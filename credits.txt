@@ -1,0 +1,43 @@
+致謝
+====
+
+ZML 字面 是以下開源專案的改作，依 MIT 授權發布：
+
+  JIZURA 字面                    (c) 2026 hakoniwa        MIT License
+  JIZURA ONE STOP EDITION（fork） 以原版為基礎加入背景、前景與主題功能
+  mp4-muxer 5.2.2                (c) 2023 Vanilagy        MIT License
+
+授權全文見同資料夾的 LICENSE 與 THIRD_PARTY_NOTICES.md。
+
+介面使用的字型於執行時由 Google Fonts 載入，依 SIL Open Font License 1.1 授權。
+
+繁體中文化、簡易模式與 SRT 匯入：ZML
+
+
+內建字型
+--------
+以下字型隨工具一起提供，皆可用於商業影片（含 YouTube 營利）：
+
+  怪盜預告黑體　KaitouYokokuGothic（she），基於 Source Han Sans © Adobe　【SIL OFL 1.1】
+  瀞故障黑體 H1　瀞ノグリッチ黒体 © 2021 RAPTORTYPE（あまずさ鴒）　【SIL OFL 1.1】
+  瀞故障黑體 H2　瀞ノグリッチ黒体 © 2021 RAPTORTYPE（あまずさ鴒）　【SIL OFL 1.1】
+  瀞故障黑體 H3　瀞ノグリッチ黒体 © 2021 RAPTORTYPE（あまずさ鴒）　【SIL OFL 1.1】
+  瀞故障黑體 H4　瀞ノグリッチ黒体 © 2021 RAPTORTYPE（あまずさ鴒）　【SIL OFL 1.1】
+  瀞圓點黑體　瀞ノクーゲル黒体 © 2022 RAPTORTYPE（あまずさ鴒）　【SIL OFL 1.1】
+  瀞圓點明朝　瀞ノクーゲル明朝 © 2022 RAPTORTYPE（あまずさ鴒）　【SIL OFL 1.1】
+  侵蝕明朝　ShinsyokuMincho，基於 Source Han Serif © Adobe　【SIL OFL 1.1】
+  限界明朝　源界明朝（flopdesign.com），基於 Source Han Serif © Adobe　【SIL OFL 1.1】
+  裝甲明朝　装甲明朝（flopdesign.com），基於 Source Han Serif © Adobe　【SIL OFL 1.1】
+  赤薔薇　赤薔薇シンデレラ © 2017 M+ FONTS PROJECT / MODI　【M+ FONTS LICENSE（可自由使用、複製、散布，含商用）】
+  黑薔薇　黒薔薇シンデレラ © 2017 M+ FONTS PROJECT / MODI　【M+ FONTS LICENSE（可自由使用、複製、散布，含商用）】
+  匯文明朝　匯文明朝體（字型檔標示 Public Domain）　【Public Domain】
+  破線黑體　破線G，基於 Source Han Sans © Adobe　【SIL OFL 1.1】
+  切子黑體　CutGlassG，基於 Source Han Sans © Adobe　【SIL OFL 1.1】
+  流怪譚・微傷　あやしげ書体『流怪譚』© Rwi（booth.pm/items/7245665）　【SIL OFL 1.1（作者 BOOTH 頁面標示，可商用）】
+  流怪譚・扭曲　あやしげ書体『流怪譚』© Rwi（booth.pm/items/7245665）　【SIL OFL 1.1（作者 BOOTH 頁面標示，可商用）】
+  流怪譚・雨垂　あやしげ書体『流怪譚』© Rwi（booth.pm/items/7245665）　【SIL OFL 1.1（作者 BOOTH 頁面標示，可商用）】
+  流怪譚・假解析　あやしげ書体『流怪譚』© Rwi（booth.pm/items/7245665）　【SIL OFL 1.1（作者 BOOTH 頁面標示，可商用）】
+  流怪譚・細　あやしげ書体『流怪譚』© Rwi（booth.pm/items/7245665）　【SIL OFL 1.1（作者 BOOTH 頁面標示，可商用）】
+  四月黑體　AprilGothic © 2024 LavsicDesign，基於 Dela Gothic One　【SIL OFL 1.1】
+
+各字型的授權全文：fonts 資料夾裡的「授權全文.txt」

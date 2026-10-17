@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZML 字面 圖解教學</title>
+<style>
+  :root { --bg: #0b0b0e; --panel: #131318; --line: #2a2a33; --text: #ece7e1; --muted: #a29ea8; --accent: #6fd6c9; --mark: #ff3d6e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.75 "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 30px; letter-spacing: .08em; margin: 0 0 4px; }
+  h2 { font-size: 23px; margin: 56px 0 6px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--accent); }
+  h3 { font-size: 19px; margin: 34px 0 10px; }
+  p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; }
+  nav a { color: var(--text); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; background: var(--panel); }
+  nav a:hover { border-color: var(--accent); }
+  figure { margin: 14px 0 6px; }
+  figure img { display: block; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
+  ol.marks { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px; }
+  ol.marks li { display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: start; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  ol.marks li > i { font-style: normal; width: 28px; height: 28px; border-radius: 50%; background: var(--mark); color: #fff; font-weight: 700; text-align: center; line-height: 28px; margin-top: 1px; }
+  b.ui { color: var(--accent); font-weight: 600; }
+  .tip, .warn { border-radius: 10px; padding: 12px 16px; margin: 16px 0; }
+  .tip { background: #10211f; border: 1px solid #24514b; }
+  .warn { background: #2a1d10; border: 1px solid #5c3f1d; }
+  .steps { counter-reset: s; list-style: none; padding: 0; display: grid; gap: 8px; }
+  .steps li { counter-increment: s; position: relative; padding: 10px 14px 10px 54px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  .steps li::before { content: counter(s); position: absolute; left: 14px; top: 10px; width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: #06110f; font-weight: 700; text-align: center; line-height: 28px; }
+</style>
+</head>
+<body>
+<main>
+<h1>ZML 字面　圖解教學</h1>
+<p class="muted">每張圖上的紅色編號，對應圖下面的說明。文字版的完整說明在同一個資料夾的「說明書.html」。</p>
+<nav>
+  <a href="#basic">一、做出第一支 MV</a>
+  <a href="#gallery">二、特效圖鑑：先看再挑</a>
+  <a href="#mine">三、存成「我的樣式」，以後都照這樣</a>
+  <a href="#fonts">四、加自己的字型</a>
+  <a href="#editor">五、進階剪輯器</a>
+</nav>
+
+<h2 id="basic">一、做出第一支 MV</h2>
+<p>用 <b>Chrome 或 Edge</b> 打開「開啟.html」。整個「ZML字面」資料夾要一起留著，旁邊的 fonts 資料夾不在的話，特殊字型都不會出現。</p>
+
+<h3>步驟 1　放進你的檔案</h3>
+<figure><img src="guide-img/01_files.png" alt="首頁上方：歌曲、字幕、背景三個放檔案的格子，以及右上角三個按鈕" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div><b>歌曲</b>：把 mp3、wav、m4a 拖進來，或點一下選檔。<b>檔名會當成歌名</b>，間奏時會顯示，請先改成正式歌名。</div></li>
+  <li><i>2</i><div><b>字幕</b>：SRT 檔。歌詞什麼時候出現、出現多久，全照這個檔的時間。</div></li>
+  <li><i>3</i><div><b>背景</b>：圖片或影片，可以一次放很多個，會輪流出現。影片會從頭播到尾，播完換下一個。</div></li>
+  <li><i>4</i><div>不想放圖：按 <b class="ui">黑底</b> 或 <b class="ui">白底</b>。</div></li>
+  <li><i>5</i><div><b class="ui">說明書</b>：文字版的完整說明。</div></li>
+  <li><i>6</i><div><b class="ui">特效圖鑑</b>：每個風格、字體、特效長什麼樣子，見第二節。</div></li>
+  <li><i>7</i><div><b class="ui">進階剪輯器</b>：原版完整的編輯器，見第五節。一般用不到。</div></li>
+</ol>
+
+<h3>步驟 2　選一個感覺</h3>
+<figure><img src="guide-img/02_look.png" alt="步驟 2：我的樣式、主題、風格卡片" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div><b>我的樣式</b>：存過才會出現。選了它，下面的設定都照存下來的那一套，見第三節。平常選 <b class="ui">不用我的樣式</b>。</div></li>
+  <li><i>2</i><div><b>主題</b>：歌的類型（抒情、搖滾、恐怖…），決定用哪一類排版和特效。不確定就選 <b class="ui">自動</b>。</div></li>
+  <li><i>3</i><div><b>風格</b>：配色和字體。標「ZML 精選」的是我們配好的特殊字體組合。不確定就選 <b class="ui">幫我選</b>。想先看每個風格動起來的樣子，到特效圖鑑的「風格」頁。</div></li>
+</ol>
+<figure><img src="guide-img/03_options.png" alt="步驟 2 下半：自己挑字體、沉穩熱鬧滑桿、三個勾選" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div><b>自己挑字體</b>：點一下展開。勾了就只用你勾的字體輪流出現，詳見第四節。</div></li>
+  <li><i>2</i><div><b>沉穩 ↔ 熱鬧</b>：往右動得更多、閃爍和裝飾更多、跟著鼓點的震動更明顯。</div></li>
+  <li><i>3</i><div><b>疊化字</b>：歌詞半透明地融進背景。勾了會多出一條「淡 ↔ 濃」滑桿調透明度。只對圖片、影片背景有效。</div></li>
+  <li><i>4</i><div><b>中間留給角色</b>：歌詞只放在畫面上方或下方，不擋住畫面中間的人物。</div></li>
+  <li><i>5</i><div><b>純文字排版</b>：只用字本身排，不要票券、報紙這類道具，也不要小數字和時間碼。</div></li>
+  <li><i>6</i><div><b>副歌呼應</b>：重複唱的歌詞（像副歌）用跟第一次一模一樣的排版、動作和字體，背景和配色也換得比較少。看得出歌的段落，比較有 MV 的結構感。</div></li>
+  <li><i>7</i><div><b>好讀優先</b>：只用字夠大的排版，每句最多一個裝飾，故障和色偏減弱。歌詞很長、或想讓人看清楚歌詞時用。</div></li>
+</ol>
+
+<h3>浮水印（自己的 logo 或名字）</h3>
+<figure><img src="guide-img/04b_mark.png" alt="浮水印設定" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div>點 <b class="ui">浮水印</b> 展開。右邊的小字會告訴你現在的狀態。</div></li>
+  <li><i>2</i><div><b class="ui">＋ 放浮水印圖片</b>：選一張圖，或直接把圖拖進這一塊。<b>建議用去背的 PNG（透明底）</b>，不然會連白底一起蓋上去。</div></li>
+  <li><i>3</i><div><b>顯示浮水印</b>：打勾才會出現。放了新圖會自動勾起來。</div></li>
+  <li><i>4</i><div><b>位置</b>：九宮格，點哪一格就放哪裡（四個角、四個邊的中間、正中間）。</div></li>
+  <li><i>5</i><div><b>大小</b>：以畫面短邊算的寬度，所以橫式、直式看起來一樣大。</div></li>
+  <li><i>6</i><div><b>不透明度</b>：往左越透明。</div></li>
+  <li><i>7</i><div><b class="ui">移除圖片</b>。</div></li>
+</ol>
+<p>浮水印會出現在預覽和輸出的每一格畫面上，不會跟著鼓點震、也不會跟著鏡頭動。生成之後再回來改位置或大小，預覽會馬上跟著變。圖片存在你這台電腦的瀏覽器裡，下次打開還在；每個人放自己的，不會互相影響。</p>
+
+<h3>步驟 3　生成</h3>
+<figure><img src="guide-img/05_generate.png" alt="步驟 3：橫式直式與生成按鈕" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div><b class="ui">橫式 16:9</b>（YouTube）或 <b class="ui">直式 9:16</b>（Shorts、抖音）。</div></li>
+  <li><i>2</i><div><b class="ui">生成 MV</b>：幾秒鐘就會出現預覽。</div></li>
+</ol>
+
+<h3>預覽、換一版、輸出</h3>
+<figure><img src="guide-img/06_result.png" alt="預覽頁：預覽畫面與下方一排按鈕" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div><b>預覽</b>：按下面的播放鍵邊聽邊看，可以拖時間軸跳著看。</div></li>
+  <li><i>2</i><div><b class="ui">← 重新選</b>：回到上一頁換檔案或換設定。</div></li>
+  <li><i>3</i><div><b class="ui">換一版</b>：同樣的設定，重新排一次。不喜歡就一直按，每次都不一樣。</div></li>
+  <li><i>4</i><div><b class="ui">存成我的樣式</b>：喜歡這一版的感覺就存起來，見第三節。</div></li>
+  <li><i>5</i><div><b>只輸出第幾句到第幾句</b>：只想先輸出一小段看效果時用。留空＝整首。</div></li>
+  <li><i>6</i><div><b class="ui">輸出 MP4</b>：固定 1080p、每秒 60 格。輸出時不要關掉分頁，也不要切去別的分頁太久。</div></li>
+</ol>
+
+<h2 id="gallery">二、特效圖鑑：先看再挑</h2>
+<p>特效有一千多個，光看名字不可能知道是什麼。圖鑑把每一個都用同一句歌詞畫成會動的小畫面。從首頁右上角或進階剪輯器左上角的 <b class="ui">特效圖鑑</b> 打開。</p>
+<figure><img src="guide-img/07_gallery.png" alt="特效圖鑑的排版頁" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div><b>分頁</b>：風格、字體、排版、進場、停留、退場、裝飾、文字加工、背景圖形、鏡頭、畫面特效、換句轉場、圖片影片。</div></li>
+  <li><i>2</i><div><b>搜尋名稱</b>：打中文找。</div></li>
+  <li><i>3</i><div><b>篩選</b>：只看已打勾、沒打勾的；排版頁可以只看「純文字」或「簡易不用」的。</div></li>
+  <li><i>4</i><div><b class="ui">畫面上這些全打勾／全取消</b>：只動目前篩出來的那些。只想留幾個時：先全取消，再勾你要的。</div></li>
+  <li><i>5</i><div><b>小畫面</b>：點一下會放大重複播放。</div></li>
+  <li><i>6</i><div><b>打勾＝會用，取消＝不用。</b>勾完畫面上這支 MV 會馬上照新的勾重排。</div></li>
+  <li><i>7</i><div><b>小標籤</b>：「純文字」只有字沒有道具；「簡易不用」是簡易模式平常不會自動用的（字會歪、太小或看不全，滑鼠停在格子上會寫原因）；「可能擋字」是會畫在歌詞上面的裝飾。</div></li>
+  <li><i>8</i><div><b>存成我的樣式</b>：在圖鑑裡直接存，見第三節。</div></li>
+</ol>
+
+<h3>風格頁</h3>
+<figure><img src="guide-img/10_gallery_styles.png" alt="特效圖鑑的風格頁" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div>每個風格用三句歌詞示範。平常一秒換一張畫面，<b>滑鼠移上去才會動</b>，點一下放大。</div></li>
+  <li><i>2</i><div>點名字前面的圓圈＝下一次生成用這個風格，等於在首頁點那張風格卡。</div></li>
+</ol>
+
+<h3>字體頁</h3>
+<figure><img src="guide-img/09_gallery_fonts.png" alt="特效圖鑑的字體頁" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div>每套字體寫同一句話，你自己加的字型排在最後。</div></li>
+  <li><i>2</i><div>打勾＝等於在首頁「自己挑字體」打勾。有字空掉＝那套字體沒有這個字，MV 裡會自動換備用字體補上。</div></li>
+</ol>
+
+<h3>圖片影片頁（背景的運鏡）</h3>
+<figure><img src="guide-img/08_gallery_media.png" alt="特效圖鑑的圖片影片頁，只看已打勾的四種" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div>背景圖片、影片怎麼動。<b>一個都沒動過</b>時，用 ZML 挑好的那幾種慢速運鏡（標「簡易會用」）。<b>只要你在這頁勾或取消過</b>，之後就只用你勾著的。全部取消＝背景不動。</div></li>
+  <li><i>2</i><div>按 <b class="ui">已打勾</b> 可以檢查現在到底留了哪幾個。</div></li>
+  <li><i>3</i><div>右上角隨時顯示這一頁勾了幾個。</div></li>
+</ol>
+
+<h2 id="mine">三、存成「我的樣式」，以後都照這樣</h2>
+<p>平常每次生成、每次換一版都是重新抽。「我的樣式」把你挑好的一整套記下來，之後每支 MV 都只在那一套裡面輪。</p>
+<ol class="steps">
+  <li>先在首頁隨便生成一支（選一個接近你想要的風格當起點）。</li>
+  <li>打開 <b class="ui">特效圖鑑</b>，一頁一頁把不要的取消、要的留著。每勾一下，背後的 MV 就會照著重排。</li>
+  <li>在圖鑑最下面打一個名字，按 <b class="ui">存成我的樣式</b>（下圖）。</li>
+  <li>存好就已經選上了。關掉圖鑑，按 <b class="ui">換一版</b> 或重新 <b class="ui">生成 MV</b>，都照你勾的走。</li>
+</ol>
+<figure><img src="guide-img/11_gallery_save.png" alt="圖鑑最下面的存檔列" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div>樣式名稱。同名會蓋掉舊的。</div></li>
+  <li><i>2</i><div><b class="ui">存成我的樣式</b>。</div></li>
+  <li><i>3</i><div>看到「已存成我的樣式…也已經選好了」就成功了。</div></li>
+</ol>
+
+<h3>下次怎麼用</h3>
+<figure><img src="guide-img/12_preset_on.png" alt="首頁步驟 2，我的樣式被選上" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div>首頁步驟 2 最上面點 <b class="ui">★ 你的樣式名稱</b>。旁邊的 × 是刪除。</div></li>
+  <li><i>2</i><div>出現這行綠字，就代表正在用。這時首頁的<b>主題和風格</b>會變灰，照樣式那一套；<b>字體、滑桿和下面那排勾選都還能調</b>，會先填上樣式存的值，你再改。</div></li>
+  <li><i>3</i><div>想回到每次隨機：點 <b class="ui">不用我的樣式</b>。</div></li>
+</ol>
+<div class="warn"><b>沒有存就按換一版，勾選會被重新抽掉。</b>挑完一定要存。<br>「我的樣式」存在你這台電腦的瀏覽器裡：換電腦、換瀏覽器、清除瀏覽資料都會不見，也不會跟著工具傳給朋友。</div>
+
+<h2 id="fonts">四、加自己的字型</h2>
+<figure><img src="guide-img/04_fonts.png" alt="展開後的自己挑字體" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div><b>內建字型</b>：都可以放營利影片。勾幾套，整支 MV 就只用那幾套輪流出現；都不勾就用風格配好的。</div></li>
+  <li><i>2</i><div>這裡會顯示你挑了幾套。</div></li>
+  <li><i>3</i><div><b class="ui">＋ 加入字型檔</b>：選檔視窗裡按住 Ctrl 點多個，或 Ctrl+A 全選。</div></li>
+  <li><i>4</i><div><b class="ui">＋ 加入整個資料夾</b>：<b>字型很多時用這個最快</b>。全部放進同一個資料夾，選那個資料夾，裡面每一層都會掃，不是字型的檔案會自動跳過。瀏覽器問「要上傳嗎」請按上傳，那只是讀進這個網頁，不會傳到網路上。</div></li>
+  <li><i>5</i><div><b>你自己加的字型</b>：加進來會自動打勾，不要了點 ×。</div></li>
+</ol>
+<div class="tip">字型會發牌：每套都輪過一次才會重複。所以勾的字型比歌詞句數多時，有幾套這一版一定輪不到，按換一版就會換另一批。<br>只有英文字母的字型，只會用在英文歌詞。日文字型常缺繁體字，缺字的那句就不會用它。</div>
+<div class="warn">自己加的字型能不能放營利影片，請自己確認那套字型的授權。資料夾用拖的不行（瀏覽器不讓讀），請用按鈕；字型檔可以直接拖進「自己挑字體」那一塊。</div>
+
+<h2 id="editor">五、進階剪輯器</h2>
+<figure><img src="guide-img/13_editor.png" alt="進階剪輯器右上角的按鈕" loading="lazy"></figure>
+<ol class="marks">
+  <li><i>1</i><div><b class="ui">← 簡易模式</b>：回到首頁。</div></li>
+  <li><i>2</i><div><b class="ui">特效圖鑑</b>：跟首頁那個是同一個。</div></li>
+</ol>
+<p>進階剪輯器是原版的完整編輯器，可以單獨改某一句的排版、時間、字體。改完直接在進階裡輸出；如果回簡易頁按換一版，單句的修改會被蓋掉。<b class="ui">洗牌</b> 會照你在圖鑑勾的特效重新排。</p>
+</main>
+</body>
+</html>

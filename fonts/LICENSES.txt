@@ -1,0 +1,211 @@
+﻿ZML 字面　內建字型的授權
+======================
+
+fonts 資料夾裡的字型都是可以自由散布、可用於商業影片的授權。轉傳這個工具時，請連同這個檔案一起保留。
+
+怪盜預告黑體（fonts/zKaitou.ttf）
+  授權：SIL OFL 1.1
+  著作權：© 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
+  作者：KaitouYokokuGothic（she），基於 Source Han Sans © Adobe
+
+瀞故障黑體 H1（fonts/zGlitch1.otf）
+  授權：SIL OFL 1.1
+  著作權：© 2021 RAPTORTYPE
+  作者：瀞ノグリッチ黒体 © 2021 RAPTORTYPE（あまずさ鴒）
+
+瀞故障黑體 H2（fonts/zGlitch2.otf）
+  授權：SIL OFL 1.1
+  著作權：© 2021 RAPTORTYPE
+  作者：瀞ノグリッチ黒体 © 2021 RAPTORTYPE（あまずさ鴒）
+
+瀞故障黑體 H3（fonts/zGlitch3.otf）
+  授權：SIL OFL 1.1
+  著作權：© 2021 RAPTORTYPE
+  作者：瀞ノグリッチ黒体 © 2021 RAPTORTYPE（あまずさ鴒）
+
+瀞故障黑體 H4（fonts/zGlitch4.otf）
+  授權：SIL OFL 1.1
+  著作權：© 2021 RAPTORTYPE
+  作者：瀞ノグリッチ黒体 © 2021 RAPTORTYPE（あまずさ鴒）
+
+瀞圓點黑體（fonts/zKugelSans.otf）
+  授權：SIL OFL 1.1
+  著作權：© 2022 RAPTORTYPE
+  作者：瀞ノクーゲル黒体 © 2022 RAPTORTYPE（あまずさ鴒）
+
+瀞圓點明朝（fonts/zKugelSerif.otf）
+  授權：SIL OFL 1.1
+  著作權：© 2022 RAPTORTYPE
+  作者：瀞ノクーゲル明朝 © 2022 RAPTORTYPE（あまずさ鴒）
+
+侵蝕明朝（fonts/zShinsyoku.ttf）
+  授權：SIL OFL 1.1
+  著作權：Copyright © 2017 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'.
+  作者：ShinsyokuMincho，基於 Source Han Serif © Adobe
+
+限界明朝（fonts/zGenkai.ttf）
+  授權：SIL OFL 1.1
+  著作權：Adobe Systems Incorporated
+  作者：源界明朝（flopdesign.com），基於 Source Han Serif © Adobe
+
+裝甲明朝（fonts/zSoukou.ttf）
+  授權：SIL OFL 1.1
+  著作權：Adobe Systems Incorporated
+  作者：装甲明朝（flopdesign.com），基於 Source Han Serif © Adobe
+
+赤薔薇（fonts/zAkabara.ttf）
+  授權：M+ FONTS LICENSE（可自由使用、複製、散布，含商用）
+  著作權：Copyright(c) 2017 M+ FONTS PROJECT/MODI
+  作者：赤薔薇シンデレラ © 2017 M+ FONTS PROJECT / MODI
+
+黑薔薇（fonts/zKurobara.ttf）
+  授權：M+ FONTS LICENSE（可自由使用、複製、散布，含商用）
+  著作權：Copyright(c) 2017 M+ FONTS PROJECT/MODI
+  作者：黒薔薇シンデレラ © 2017 M+ FONTS PROJECT / MODI
+
+匯文明朝（fonts/zHuiwen.otf）
+  授權：Public Domain
+  著作權：Public Domain
+  作者：匯文明朝體（字型檔標示 Public Domain）
+
+破線黑體（fonts/zHasen.ttf）
+  授權：SIL OFL 1.1
+  著作權：© 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
+  作者：破線G，基於 Source Han Sans © Adobe
+
+切子黑體（fonts/zCutGlass.ttf）
+  授權：SIL OFL 1.1
+  著作權：© 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
+  作者：CutGlassG，基於 Source Han Sans © Adobe
+
+流怪譚・微傷（fonts/zKaitanBishou.ttf）
+  授權：SIL OFL 1.1（作者 BOOTH 頁面標示，可商用）
+  著作權：Rwi (@rwiiug)
+  作者：あやしげ書体『流怪譚』© Rwi（booth.pm/items/7245665）
+
+流怪譚・扭曲（fonts/zKaitanGunyari.ttf）
+  授權：SIL OFL 1.1（作者 BOOTH 頁面標示，可商用）
+  著作權：Rwi (@rwiiug)
+  作者：あやしげ書体『流怪譚』© Rwi（booth.pm/items/7245665）
+
+流怪譚・雨垂（fonts/zKaitanAmadare.ttf）
+  授權：SIL OFL 1.1（作者 BOOTH 頁面標示，可商用）
+  著作權：Rwi (@rwiiug)
+  作者：あやしげ書体『流怪譚』© Rwi（booth.pm/items/7245665）
+
+流怪譚・假解析（fonts/zKaitanFake.ttf）
+  授權：SIL OFL 1.1（作者 BOOTH 頁面標示，可商用）
+  著作權：Rwi (@rwiiug)
+  作者：あやしげ書体『流怪譚』© Rwi（booth.pm/items/7245665）
+
+流怪譚・細（fonts/zKaitanHosomi.ttf）
+  授權：SIL OFL 1.1（作者 BOOTH 頁面標示，可商用）
+  著作權：Rwi (@rwiiug)
+  作者：あやしげ書体『流怪譚』© Rwi（booth.pm/items/7245665）
+
+四月黑體（fonts/zApril.ttf）
+  授權：SIL OFL 1.1
+  著作權：Copyright 2024 LavsicDesign | Copyright 2020 The Dela Gothic Project Authors (https://github.com/syakuzen/DelaGothic)
+  作者：AprilGothic © 2024 LavsicDesign，基於 Dela Gothic One
+
+
+以下標示 SIL OFL 1.1 的字型，適用下面這份授權全文（每套字的著作權人見上方清單）：
+
+-----------------------------------------------------------
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+-----------------------------------------------------------
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded, 
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting,
+or substituting -- in part or in whole -- any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+PERMISSION & CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components,
+in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the corresponding
+Copyright Holder. This restriction only applies to the primary font name as
+presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created
+using the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+
+
+以下標示 M+ FONTS LICENSE 的字型（赤薔薇、黑薔薇），適用：
+
+M+ FONTS LICENSE
+
+These fonts are free software.
+Unlimited permission is granted to use, copy, and distribute them, with
+or without modification, either commercially or noncommercially.
+THESE FONTS ARE PROVIDED "AS IS" WITHOUT WARRANTY.
+
+匯文明朝體為公眾領域（Public Domain）。

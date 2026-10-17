@@ -1071,7 +1071,7 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
       <label id="zmlBlendRow" class="zml-mood zml-sub" hidden><span>淡</span><input id="zmlBlendAmount" type="range" min="20" max="100" step="5" value="80" aria-label="疊化字的濃淡"><span>濃</span><b id="zmlBlendValue">80%</b><small>歌詞有多實：往左更透、更融進畫面，往右更清楚</small></label>
       <label class="zml-check"><input id="zmlCenterClear" type="checkbox"><span>中間留給角色</span><small>歌詞只放在畫面上方或下方的橫帶，不蓋住中間的人物（字會比滿版小）</small></label>
       <label class="zml-check"><input id="zmlTypeOnly" type="checkbox"><span>純文字排版</span><small>只用字本身做排版，不要票券、卡帶、報紙這類道具、裝飾圖形，也不要小數字和時間碼</small></label>
-      <label class="zml-check"><input id="zmlEcho" type="checkbox"><span>副歌呼應</span><small>重複唱的歌詞（像副歌）用跟第一次一模一樣的排版、動作和字體，背景和配色也換得比較少，聽得出歌的段落</small></label>
+      <label class="zml-check"><input id="zmlEcho" type="checkbox"><span>副歌呼應</span><small>重複唱的歌詞（像副歌）用跟第一次一模一樣的排版、動作和字體，其他句子照常隨機變化，聽得出歌的段落</small></label>
       <label class="zml-check"><input id="zmlReadable" type="checkbox"><span>好讀優先</span><small>只用字夠大的排版，每句最多一個裝飾，故障和色偏減弱；歌詞很長、或想讓人看清楚歌詞時用</small></label>
       <details id="zmlMarkBox" class="zml-fonts zml-mark"><summary>浮水印<small id="zmlMarkNote"></small></summary>
         <div class="zml-mark-body">
@@ -46533,8 +46533,9 @@ const applyLook = (project, options) => {
   else setMood(project, mood);
   if (project.zmlTypeOnly) Object.assign(project.fx, { hud: 'off', zmlHideNumbers: true });
   project.fx.zmlCenterClear = project.zmlCenterClear;
-  // 副歌呼應: also the editor's 統一感重視 — fewer background and colour switches inside a part
-  project.fx.zmlEcho = !!echo; if (echo) project.themeBalance = 'unified';
+  // 副歌呼應 only repeats lines sung again. The editor's 統一感重視 is never used here: it shares one look across a
+  // part (lines between blank lines), and subtitles have none, so the whole song would get a single entrance and layout.
+  project.fx.zmlEcho = !!echo; project.themeBalance = 'lively';
   project.fx.zmlReadable = !!readable;
   if (readable) Object.assign(project.fx, { glitch: project.fx.glitch * 0.3, chroma: project.fx.chroma * 0.5, decor: project.fx.decor * 0.5 });   // no viewfinder frame, counters or clocks
   // The editor's automatic placement shrinks each lyric into a random part of the frame; 簡易模式 places lyrics itself.

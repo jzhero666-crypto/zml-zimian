@@ -47045,7 +47045,10 @@ function drawInterlude(ctx, plan, t, gap) {
   const energyAt = time => plan.energy && plan.energyRate ? plan.energy[J.clamp(Math.round(time * plan.energyRate), 0, plan.energy.length - 1)] || 0 : 0.4;
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
   const cx = w / 2, cy = h / 2, bars = 96, inner = unit * 0.2, level = energyAt(t);
+  // before the first line only the song's name: the ring of bars is for the interludes inside the song
+  const intro = gap[0] < 0.01;
   ctx.globalAlpha = alpha * (media ? 0.75 : 0.9);
+  if (!intro) {
   ctx.lineCap = 'round'; ctx.lineWidth = Math.max(2, unit * 0.0045);
   for (let i = 0; i < bars; i++) {
     // each bar shows the loudness a little earlier or later than now, so the ring ripples with the music
@@ -47056,6 +47059,7 @@ function drawInterlude(ctx, plan, t, gap) {
   }
   ctx.globalAlpha = alpha * 0.9; ctx.strokeStyle = sc.accent; ctx.lineWidth = Math.max(1.5, unit * 0.003);
   ctx.beginPath(); ctx.arc(cx, cy, inner * (0.9 + 0.06 * level), 0, J.TAU); ctx.stroke();
+  }
   const title = plan.fx.zmlTitle || '';
   // the editor's own big title card (at the very start) already shows the name: no second, small one over it
   const card = title && plan.cuts.some(c => !(Number.isInteger(c.part) && c.line >= 0) && t >= c.start && t < c.end && String(c.text || '').includes(title));

@@ -46531,12 +46531,15 @@ const applyLook = (project, options) => {
   if (!preset) for (const key of Object.keys(layouts)) layouts[key] = chosen.length >= 8 ? chosen.includes(key) : Z.layoutAllowed(key);
   if (typeOnly || centerClear) {   // a band along the top or bottom has room for type, not for props
     const plain = (centerClear ? Z.BAND_LAYOUTS : Z.TYPE_ONLY_LAYOUTS).filter(key => key in layouts && Z.layoutAllowed(key)), kept = plain.filter(key => layouts[key]);
-    for (const key of Object.keys(layouts)) layouts[key] = (kept.length >= 6 ? kept : plain).includes(key);
+    // a saved look never gets back a layout it unticked: only its own that fit, or (none fit) its own as they are
+    if (preset) { if (kept.length) for (const key of Object.keys(layouts)) layouts[key] = kept.includes(key); }
+    else for (const key of Object.keys(layouts)) layouts[key] = (kept.length >= 6 ? kept : plain).includes(key);
     for (const key of Object.keys(project.enabled.decor || {})) project.enabled.decor[key] = false;   // no drawn ornaments either
   }
   if (readable) {   // only layouts that draw the line large; a saved look keeps the ones it ticked, minus the small ones
     const big = Object.keys(layouts).filter(key => layouts[key] && Z.layoutReadable(key));
-    for (const key of Object.keys(layouts)) layouts[key] = big.length >= 6 ? big.includes(key) : Z.layoutReadable(key);
+    if (preset) { if (big.length) for (const key of Object.keys(layouts)) layouts[key] = big.includes(key); }
+    else for (const key of Object.keys(layouts)) layouts[key] = big.length >= 6 ? big.includes(key) : Z.layoutReadable(key);
   }
   project.zmlTypeOnly = !!typeOnly;
   project.zmlCenterClear = !!centerClear;
@@ -47358,6 +47361,15 @@ Z.fillFromPreset = (name) => {
   $('zmlMood').value = Math.round((+z.mood || 0) * 100);
   set('zmlBlendIn', z.blendIn); $('zmlBlendAmount').value = z.blendAmount ?? 80; $('zmlBlendAmount').dispatchEvent(new Event('input', { bubbles: true }));
   set('zmlCenterClear', z.centerClear); set('zmlTypeOnly', z.typeOnly); set('zmlEcho', z.echo); set('zmlReadable', z.readable);
+  // the faces it was last used with
+  const pool = new Set(z.fontPool || []);
+  for (const box of home.querySelectorAll('#zmlFonts input, #zmlOwnFonts input')) if (box.checked !== pool.has(box.value)) { box.checked = pool.has(box.value); box.dispatchEvent(new Event('change', { bubbles: true })); }
+};
+/* the slider, switches and faces a look was last generated with become its own, so picking it again brings them back */
+Z.rememberPresetPage = (name, page) => {
+  const list = Z.presets(), p = list.find(x => x.name === name); if (!p) return;
+  Object.assign(p.zml, page);
+  try { localStorage.setItem(STORE, JSON.stringify(list)); } catch (e) {}
 };
 Z.deletePreset = (name) => { try { localStorage.setItem(STORE, JSON.stringify(Z.presets().filter(p => p.name !== name))); } catch (e) {} };
 const buildPresets = () => {
@@ -47445,6 +47457,7 @@ Z.drawPreviewAt = t => { player.currentTime = t; const plan = J.ui.plan; J.syncM
 $('zmlGenerate').addEventListener('click', async () => {
   if (state.busy || missing().length) return;
   state.busy = true; state.error = ''; sync();
+  if (state.preset) Z.rememberPresetPage(state.preset, { mood: $('zmlMood').value / 100, blendIn: $('zmlBlendIn').checked, blendAmount: +$('zmlBlendAmount').value, centerClear: $('zmlCenterClear').checked, typeOnly: $('zmlTypeOnly').checked, echo: $('zmlEcho').checked, readable: $('zmlReadable').checked, fontPool: Z.tickedFonts() });
   try {
     await Z.generate({ audioFile: state.audio, srtText: state.srtText, background: state.background, mediaFiles: state.media, themeId: state.themeId, styleKey: state.styleKey, aspect: state.aspect, mood: $('zmlMood').value / 100, typeOnly: $('zmlTypeOnly').checked, blendIn: $('zmlBlendIn').checked, blendAmount: +$('zmlBlendAmount').value, centerClear: $('zmlCenterClear').checked, echo: $('zmlEcho').checked, readable: $('zmlReadable').checked, fontPool: Z.tickedFonts(), preset: Z.presets().find(p => p.name === state.preset) || null });
     J.uiApi.pause();
@@ -47704,7 +47717,14 @@ const isOn = (tab, key) => tab === 'style' ? Z.homeState?.styleKey === key
   : tab === 'media' ? J.mediaEffectSettings(project(), 'media').enabled[key] !== false
   : (project().enabled[tab] || {})[key] !== false;
 let pending = 0;
+/* The editor remembers each line's drawn effects (so a pool change only shows at the next draw). In 簡易 the ticks
+   are the choice itself: forget what was drawn, so the same seed draws again from what is ticked now. */
+Z.forgetAutoEffects = (p, layers = ['lyrics', 'media']) => {
+  if (layers.includes('lyrics')) for (const o of Object.values(p.lyricCutOptions || {})) if (o) delete o.autoEffects;
+  for (const layer of layers.filter(l => l !== 'lyrics')) for (const o of Object.values(p[layer]?.cutOverrides || {})) if (o) delete o.autoEffects;
+};
 const changed = (tab) => { clearTimeout(pending); pending = setTimeout(() => {
+  if (project().fx?.zml && tab && !['style', 'font', 'lut'].includes(tab)) Z.forgetAutoEffects(project(), [tab === 'media' ? 'media' : 'lyrics']);
   J.uiApi.syncUI(); J.uiApi.replan();
   // the background of a 簡易 MV is laid out by ZML: lay it out again with the new ticks
   const p = project(); if (tab === 'media' && p.fx?.zml && p.media.items.length) { Z.scheduleMedia(p, J.ui.plan, p.seed); J.uiApi.replan(); }
@@ -47891,6 +47911,9 @@ Z.openGallery = (tab) => {
   if (!frame) frame = requestAnimationFrame(tick);
 };
 /* for the tests, which cannot rely on animation frames in a hidden window */
+/* the editor's own 手法 list, in a 簡易 MV, works the same way */
+document.addEventListener('change', e => { if (e.target.closest?.('#techLists') && project().fx?.zml) { Z.forgetAutoEffects(project(), ['lyrics']); setTimeout(() => J.uiApi.replan(), 80); } }, true);
+document.addEventListener('click', e => { if (e.target.closest?.('#techLists .tg-tools button') && project().fx?.zml) { Z.forgetAutoEffects(project(), ['lyrics']); setTimeout(() => J.uiApi.replan(), 80); } }, true);
 /* the editor's own 背景 technique list counts as a choice by hand too */
 document.addEventListener('change', e => { if (e.target.matches?.('#mediaEffectsPanel [data-media-tech], #mediaEffectsPanel [data-media-group-action]')) project().fx.zmlMediaPicked = true; }, true);
 document.addEventListener('click', e => { if (e.target.matches?.('#mediaEffectsPanel [data-media-group-action]')) project().fx.zmlMediaPicked = true; }, true);

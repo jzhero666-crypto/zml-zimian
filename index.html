@@ -47063,7 +47063,7 @@ function drawInterlude(ctx, plan, t, gap) {
   }
   const title = plan.fx.zmlTitle || '';
   // the editor's own big title card (at the very start) already shows the name: no second, small one over it
-  const card = title && plan.cuts.some(c => !(Number.isInteger(c.part) && c.line >= 0) && t >= c.start && t < c.end && String(c.text || '').includes(title));
+  const card = title && plan.cuts.some(c => c.layout === 'title' && t >= c.start && t < c.end);   // whatever name it shows
   if (title && !card) {
     const face = plan.style.fonts.display[0];
     ctx.globalAlpha = alpha; ctx.fillStyle = media ? '#FFFFFF' : sc.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -47115,6 +47115,8 @@ Z.findHits = (buffer) => {
 const plan = J.plan;
 J.plan = function (project, audio, ...rest) {
   const made = plan.call(this, project, audio, ...rest); made.zmlHits = audio?.zmlHits || null;
+  // the name shown in interludes is the project's title as it is now (it can be changed in the editor)
+  if (project?.fx?.zml && project.title && project.fx.zmlTitle !== project.title) project.fx.zmlTitle = made.fx.zmlTitle = project.title;
   if (project?.fx?.zml) Z.titleFace(project, made);
   if (project?.fx?.zmlEcho) Z.echoRepeats(made);
   if (project?.fx?.zmlReadable) Z.calmForReading(made);

@@ -1079,6 +1079,7 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
       <label id="zmlBlendRow" class="zml-mood zml-sub" hidden><span>淡</span><input id="zmlBlendAmount" type="range" min="20" max="100" step="5" value="80" aria-label="疊化字的濃淡"><span>濃</span><b id="zmlBlendValue">80%</b><small>歌詞有多實：往左更透、更融進畫面，往右更清楚</small></label>
       <label class="zml-check"><input id="zmlCenterClear" type="checkbox"><span>中間留給角色</span><small>歌詞只放在畫面上方或下方的橫帶，不蓋住中間的人物（字會比滿版小）</small></label>
       <label class="zml-check"><input id="zmlTypeOnly" type="checkbox"><span>純文字排版</span><small>只用字本身做排版，不要票券、卡帶、報紙這類道具、裝飾圖形，也不要小數字和時間碼</small></label>
+      <label class="zml-mood"><span>陰影 淡</span><input id="zmlShadowAmount" type="range" min="0" max="100" step="5" value="60" aria-label="歌詞陰影"><span>濃</span><small id="zmlShadowValue">60%</small><small>背景是圖片或影片時，歌詞底下的陰影；背景偏白、或開了疊化字看不清楚時往右拉</small></label>
       <label class="zml-check"><input id="zmlEcho" type="checkbox"><span>副歌呼應</span><small>重複唱的歌詞（像副歌）用跟第一次一模一樣的排版、動作和字體，其他句子照常隨機變化，聽得出歌的段落</small></label>
       <label class="zml-check"><input id="zmlReadable" type="checkbox"><span>好讀優先</span><small>只用字夠大的排版，每句最多一個裝飾，故障和色偏減弱；歌詞很長、或想讓人看清楚歌詞時用</small></label>
       <details id="zmlMarkBox" class="zml-fonts zml-mark"><summary>浮水印<small id="zmlMarkNote"></small></summary>
@@ -9546,6 +9547,7 @@ class Renderer {
         }
         // The cut mask applies to the finished cut, after its effects, in stage units.
         if (mask && mask.target === 'cut') J.applyMaskToCanvas(target.canvas, mask, new DOMMatrix([scale, 0, 0, scale, 0, 0]), W, H, { cut, t: tq, plan });
+        if (J.zml?.underlay) J.zml.underlay(ctx, target.canvas, cut, plan, opacity, composite);   // ZML: a shadow under the lyric, laid normally even when the lyric itself is screened in
         ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = opacity; ctx.globalCompositeOperation = composite;
         ctx.drawImage(target.canvas, 0, 0); ctx.restore();
       }
@@ -46491,7 +46493,7 @@ Z.PRESET_KEYS = ['themes', 'themeBalance', 'style', 'mood', 'extra', 'wa', 'horr
 Z.presetOf = (project, name) => ({
   name: String(name || '').trim() || '我的樣式', saved: new Date().toISOString().slice(0, 10),
   settings: JSON.parse(JSON.stringify(Object.fromEntries(Z.PRESET_KEYS.filter(key => project[key] !== undefined).map(key => [key, project[key]])))),
-  zml: { mediaEnabled: project.fx?.zmlMediaPicked ? J.mediaEffectSettings(project, 'media').enabled : null, mood: project.fx?.zmlMood ?? 0.5, typeOnly: !!project.zmlTypeOnly, blendIn: !!project.fx?.zmlBlendIn, blendAmount: project.fx?.zmlBlendAmount ?? 80, centerClear: !!project.zmlCenterClear, echo: !!project.fx?.zmlEcho, readable: !!project.fx?.zmlReadable, fontPool: project.fx?.zmlFontPool || null },
+  zml: { mediaEnabled: project.fx?.zmlMediaPicked ? J.mediaEffectSettings(project, 'media').enabled : null, mood: project.fx?.zmlMood ?? 0.5, typeOnly: !!project.zmlTypeOnly, blendIn: !!project.fx?.zmlBlendIn, blendAmount: project.fx?.zmlBlendAmount ?? 80, centerClear: !!project.zmlCenterClear, echo: !!project.fx?.zmlEcho, readable: !!project.fx?.zmlReadable, shadow: project.fx?.zmlShadowAmount ?? 60, fontPool: project.fx?.zmlFontPool || null },
 });
 const applyLook = (project, options) => {
   // 我的樣式 carries its own switches; the page's are used otherwise
@@ -46558,6 +46560,7 @@ const applyLook = (project, options) => {
   project.fx.zmlEcho = !!echo; project.themeBalance = 'lively';
   project.fx.zmlReadable = !!readable;
   project.fx.zmlShadow = background === 'image';
+  project.fx.zmlShadowAmount = J.clamp(Number.isFinite(+pick('shadow')) && pick('shadow') !== undefined ? +pick('shadow') : 60, 0, 100);
   project.fx.zmlLut = background === 'image' && Z.lutFx ? Z.lutFx(seed) : null;   // 濾鏡 on the pictures and videos, as the page has it   // a soft shadow under the lyrics over pictures and videos
   if (readable) Object.assign(project.fx, { glitch: project.fx.glitch * 0.3, chroma: project.fx.chroma * 0.5, decor: project.fx.decor * 0.5 });   // no viewfinder frame, counters or clocks
   // The editor's automatic placement shrinks each lyric into a random part of the frame; 簡易模式 places lyrics itself.
@@ -46577,11 +46580,11 @@ const applyLook = (project, options) => {
   return project;
 };
 
-Z.buildProject = ({ srtText, background, themeId, styleKey, aspect, seed, mood, typeOnly, blendIn, blendAmount, centerClear, fontPool, preset, echo, readable }) => {
+Z.buildProject = ({ srtText, background, themeId, styleKey, aspect, seed, mood, typeOnly, blendIn, blendAmount, centerClear, fontPool, preset, echo, readable, shadow }) => {
   const project = J.defaultProject();
   setCues(project, readCues(srtText));
   project.aspect = aspect === '9:16' ? '9:16' : '16:9';
-  return applyLook(project, { themeId, styleKey, background, seed, mood, typeOnly, blendIn, blendAmount, centerClear, fontPool, preset, echo, readable });
+  return applyLook(project, { themeId, styleKey, background, seed, mood, typeOnly, blendIn, blendAmount, centerClear, fontPool, preset, echo, readable, shadow });
 };
 
 /* options: { audioFile, srtText, background: 'image'|'black'|'white', mediaFiles?: File[] (pictures and videos, shown in
@@ -46607,7 +46610,7 @@ Z.generate = async (options) => {
   if (kept.length !== cues.length || kept[kept.length - 1].end !== cues[kept.length - 1].end) { setCues(S.project, kept); setFonts(S.project); setBlendIn(S.project, S.project.fx.zmlBlendIn); setBands(S.project, S.project.zmlCenterClear); }
   const files = options.background === 'image' ? (options.mediaFiles || (options.imageFile ? [options.imageFile] : [])) : [];
   if (files.length) await ui.addMediaFiles(files, 'media');
-  Z.last = { themeId: options.themeId, styleKey: options.styleKey, background: options.background, mood: options.mood, typeOnly: options.typeOnly, blendIn: options.blendIn, blendAmount: options.blendAmount, centerClear: options.centerClear, echo: options.echo, readable: options.readable, fontPool: options.fontPool || null, preset: options.preset || null };
+  Z.last = { themeId: options.themeId, styleKey: options.styleKey, background: options.background, mood: options.mood, typeOnly: options.typeOnly, blendIn: options.blendIn, blendAmount: options.blendAmount, centerClear: options.centerClear, echo: options.echo, readable: options.readable, shadow: options.shadow, fontPool: options.fontPool || null, preset: options.preset || null };
   ui.replan();
   Z.scheduleMedia(S.project, S.plan, seed);
   ui.syncUI(); ui.replan(); ui.flushSave();
@@ -47040,8 +47043,16 @@ J.drawItem = (env, it) => {
   // line; ornaments and layout props keep their own look). Layers get it once, as a whole.
   if (env.fx?.zmlShadow && it && !it.shadow && !env.inLayer && it.text && env.cut && Number.isInteger(env.cut.part) && env.cut.line >= 0
       && String(env.cut.lineText || env.cut.text || '').includes(String(it.text).trim().slice(0, 1))) {
-    const size = +it.size || 40;
-    it = Object.assign({}, it, { shadow: { color: 'rgba(0,0,0,.45)', blur: Math.max(3, size * 0.09), dx: 0, dy: size * 0.025 } });
+    const size = +it.size || 40, a = J.clamp((env.fx.zmlShadowAmount ?? 60) / 100);
+    const shadow = { color: 'rgba(0,0,0,' + (0.25 + 0.6 * a).toFixed(2) + ')', blur: Math.max(3, size * (0.05 + 0.14 * a)), dx: 0, dy: size * 0.025 };
+    if (a > 0 && env.cut.blend && env.cut.blend !== 'normal') {
+      // 疊化字: the line is screened in, so a shadow drawn with it would vanish. The words are drawn once more, as they
+      // are, into a layer of their own; Z.underlay lays that layer under the cut, blacked out and blurred.
+      const S = Z.shadowLayer(env.ctx.canvas);
+      S.g.setTransform(env.ctx.getTransform()); S.g.globalAlpha = env.ctx.globalAlpha; S.g.globalCompositeOperation = 'source-over';
+      drawItem(Object.assign({}, env, { ctx: S.g }), Object.assign({}, it, { ghost: false, shadow: null }));
+      S.used = true;
+    } else if (a > 0) it = Object.assign({}, it, { shadow });
   }
   return drawItem(env, it);
 };
@@ -47191,6 +47202,28 @@ Z.echoRepeats = (plan) => {
     });
   }
   return plan;
+};
+/* Under a lyric cut that is laid in with a blend (疊化字: screen / overlay) its own shadow cannot darken anything, so
+   the shadow of the whole cut is laid first, normally: the cut drawn far off the canvas with its shadow brought back. */
+const shadowLayers = new WeakMap();
+Z.shadowLayer = (canvas) => {
+  let S = shadowLayers.get(canvas);
+  if (!S) { const c = document.createElement('canvas'); S = { c, g: c.getContext('2d'), used: false }; shadowLayers.set(canvas, S); }
+  if (S.c.width !== canvas.width || S.c.height !== canvas.height) { S.c.width = canvas.width; S.c.height = canvas.height; S.used = false; }
+  return S;
+};
+Z.underlay = (ctx, layer, cut, plan, opacity, composite) => {
+  const S = shadowLayers.get(layer); if (!S || !S.used) return;
+  const a = J.clamp((plan.fx?.zmlShadowAmount ?? 60) / 100);
+  if (composite !== 'source-over' && plan.fx?.zmlShadow && a > 0) {
+    const unit = Math.min(ctx.canvas.width, ctx.canvas.height);
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over';
+    ctx.filter = `brightness(0) blur(${(unit * (0.004 + 0.012 * a)).toFixed(1)}px)`; ctx.globalAlpha = opacity * (0.45 + 0.5 * a);
+    ctx.drawImage(S.c, 0, unit * 0.003);
+    if (a > 0.6) ctx.drawImage(S.c, 0, unit * 0.003);   // the strong end: a second, deeper pass
+    ctx.restore();
+  }
+  S.g.setTransform(1, 0, 0, 1, 0, 0); S.g.clearRect(0, 0, S.c.width, S.c.height); S.used = false;
 };
 /* 好讀優先: at most one ornament on a line, and no text treatment on top of an ornament (the upstream 文字整列 rule). */
 Z.calmForReading = (plan) => {
@@ -47361,6 +47394,7 @@ Z.fillFromPreset = (name) => {
   $('zmlMood').value = Math.round((+z.mood || 0) * 100);
   set('zmlBlendIn', z.blendIn); $('zmlBlendAmount').value = z.blendAmount ?? 80; $('zmlBlendAmount').dispatchEvent(new Event('input', { bubbles: true }));
   set('zmlCenterClear', z.centerClear); set('zmlTypeOnly', z.typeOnly); set('zmlEcho', z.echo); set('zmlReadable', z.readable);
+  if (Number.isFinite(+z.shadow) && z.shadow !== undefined) { $('zmlShadowAmount').value = z.shadow; $('zmlShadowAmount').dispatchEvent(new Event('input', { bubbles: true })); }
   // the faces it was last used with
   const pool = new Set(z.fontPool || []);
   for (const box of home.querySelectorAll('#zmlFonts input, #zmlOwnFonts input')) if (box.checked !== pool.has(box.value)) { box.checked = pool.has(box.value); box.dispatchEvent(new Event('change', { bubbles: true })); }
@@ -47457,9 +47491,9 @@ Z.drawPreviewAt = t => { player.currentTime = t; const plan = J.ui.plan; J.syncM
 $('zmlGenerate').addEventListener('click', async () => {
   if (state.busy || missing().length) return;
   state.busy = true; state.error = ''; sync();
-  if (state.preset) Z.rememberPresetPage(state.preset, { mood: $('zmlMood').value / 100, blendIn: $('zmlBlendIn').checked, blendAmount: +$('zmlBlendAmount').value, centerClear: $('zmlCenterClear').checked, typeOnly: $('zmlTypeOnly').checked, echo: $('zmlEcho').checked, readable: $('zmlReadable').checked, fontPool: Z.tickedFonts() });
+  if (state.preset) Z.rememberPresetPage(state.preset, { mood: $('zmlMood').value / 100, blendIn: $('zmlBlendIn').checked, blendAmount: +$('zmlBlendAmount').value, centerClear: $('zmlCenterClear').checked, typeOnly: $('zmlTypeOnly').checked, echo: $('zmlEcho').checked, readable: $('zmlReadable').checked, shadow: +$('zmlShadowAmount').value, fontPool: Z.tickedFonts() });
   try {
-    await Z.generate({ audioFile: state.audio, srtText: state.srtText, background: state.background, mediaFiles: state.media, themeId: state.themeId, styleKey: state.styleKey, aspect: state.aspect, mood: $('zmlMood').value / 100, typeOnly: $('zmlTypeOnly').checked, blendIn: $('zmlBlendIn').checked, blendAmount: +$('zmlBlendAmount').value, centerClear: $('zmlCenterClear').checked, echo: $('zmlEcho').checked, readable: $('zmlReadable').checked, fontPool: Z.tickedFonts(), preset: Z.presets().find(p => p.name === state.preset) || null });
+    await Z.generate({ audioFile: state.audio, srtText: state.srtText, background: state.background, mediaFiles: state.media, themeId: state.themeId, styleKey: state.styleKey, aspect: state.aspect, mood: $('zmlMood').value / 100, typeOnly: $('zmlTypeOnly').checked, blendIn: $('zmlBlendIn').checked, blendAmount: +$('zmlBlendAmount').value, centerClear: $('zmlCenterClear').checked, echo: $('zmlEcho').checked, readable: $('zmlReadable').checked, shadow: +$('zmlShadowAmount').value, fontPool: Z.tickedFonts(), preset: Z.presets().find(p => p.name === state.preset) || null });
     J.uiApi.pause();
     state.busy = false; sync();
     await showResult();
@@ -47546,6 +47580,14 @@ back.addEventListener('click', Z.showHome);
 
 if (typeof VideoEncoder !== 'function') { $('zmlSetup').hidden = true; $('zmlUnsupported').hidden = false; }
 const blendNote = () => { $('zmlBlendRow').hidden = !$('zmlBlendIn').checked; $('zmlBlendValue').textContent = $('zmlBlendAmount').value + '%'; };
+// 陰影: kept in this browser, and the MV on screen follows at once
+try { const v = localStorage.getItem('zml.shadow.v1'); if (v !== null) $('zmlShadowAmount').value = v; } catch (e) {}
+const shadowNote = () => { $('zmlShadowValue').textContent = $('zmlShadowAmount').value + '%'; };
+$('zmlShadowAmount').addEventListener('input', () => {
+  shadowNote(); try { localStorage.setItem('zml.shadow.v1', $('zmlShadowAmount').value); } catch (e) {}
+  const p = J.ui?.project; if (p?.fx?.zml) { p.fx.zmlShadowAmount = +$('zmlShadowAmount').value; if (J.ui.plan?.fx) J.ui.plan.fx.zmlShadowAmount = p.fx.zmlShadowAmount; Z.redrawPreview?.(); }
+});
+shadowNote();
 $('zmlBlendIn').addEventListener('change', blendNote); $('zmlBlendAmount').addEventListener('input', blendNote); blendNote();
 /* 自己挑字體: the bundled faces and the user's own as a tick list; none ticked = the style's own */
 Z.tickedFonts = () => [...home.querySelectorAll('#zmlFonts input:checked, #zmlOwnFonts input:checked')].map(input => input.value);

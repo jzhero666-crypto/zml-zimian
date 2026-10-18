@@ -47069,7 +47069,7 @@ function drawInterlude(ctx, plan, t, gap) {
     ctx.globalAlpha = alpha; ctx.fillStyle = media ? '#FFFFFF' : sc.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     let size = unit * 0.06; ctx.font = J.fontCSS(face, size);
     const fit = inner * 1.5 / Math.max(1, ctx.measureText(title).width); if (fit < 1) { size *= fit; ctx.font = J.fontCSS(face, size); }
-    if (media) { ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = unit * 0.02; }
+    ctx.shadowColor = media ? 'rgba(0,0,0,.6)' : 'rgba(0,0,0,.42)'; ctx.shadowBlur = unit * (media ? 0.02 : 0.014);   // readable on a pale picture too
     ctx.fillText(title, cx, cy);
   }
   ctx.restore();
@@ -47115,9 +47115,28 @@ Z.findHits = (buffer) => {
 const plan = J.plan;
 J.plan = function (project, audio, ...rest) {
   const made = plan.call(this, project, audio, ...rest); made.zmlHits = audio?.zmlHits || null;
+  if (project?.fx?.zml) Z.titleFace(project, made);
   if (project?.fx?.zmlEcho) Z.echoRepeats(made);
   if (project?.fx?.zmlReadable) Z.calmForReading(made);
   return made;
+};
+/* The opening title card takes a face from the same pool as the lyrics (the ticked faces, else the style's), chosen
+   by the seed, so 換一版 brings a different one; a face that cannot draw the whole name is passed over. */
+Z.titleFace = (project, plan) => {
+  const card = plan.cuts.find(c => c.layout === 'title'); if (!card) return;
+  const own = Array.isArray(project.fx.zmlFontPool) && project.fx.zmlFontPool.length ? project.fx.zmlFontPool : (Z.STYLES[project.style]?.pool || []);
+  const able = own.filter(key => J.FONTS[key] && Z.fontCovers(key, card.text)); if (!able.length) return;
+  const key = able[Math.floor(J.rng(project.seed + 31)() * able.length)];
+  card.params = Object.assign({}, card.params, { font: key });
+  card.fonts = { display: [key], serif: [key], body: [key], mono: ['mono'] };
+};
+/* a soft shadow under the title card's name, so it still reads on a pale picture */
+const titleRender = J.LAYOUTS.title.render;
+J.LAYOUTS.title.render = function (env) {
+  if (!env.fx?.zml && !env.plan?.fx?.zml) return titleRender.call(this, env);
+  const g = env.ctx, k = Math.abs(g.getTransform().a) || 1;   // shadows are measured in device pixels
+  g.save(); g.shadowColor = 'rgba(0,0,0,.42)'; g.shadowBlur = env.H * 0.014 * k; g.shadowOffsetY = env.H * 0.002 * k;
+  try { return titleRender.call(this, env); } finally { g.restore(); }
 };
 /* 副歌呼應: a line sung again (the chorus coming back) is shown exactly as the first time — same layout, motion,
    ornaments, colours and face — so the song's shape can be seen. Its own timing is kept. */

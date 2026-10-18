@@ -46537,6 +46537,7 @@ const applyLook = (project, options) => {
   // part (lines between blank lines), and subtitles have none, so the whole song would get a single entrance and layout.
   project.fx.zmlEcho = !!echo; project.themeBalance = 'lively';
   project.fx.zmlReadable = !!readable;
+  project.fx.zmlShadow = background === 'image';   // a soft shadow under the lyrics over pictures and videos
   if (readable) Object.assign(project.fx, { glitch: project.fx.glitch * 0.3, chroma: project.fx.chroma * 0.5, decor: project.fx.decor * 0.5 });   // no viewfinder frame, counters or clocks
   // The editor's automatic placement shrinks each lyric into a random part of the frame; 簡易模式 places lyrics itself.
   project.lyricEffects = Object.assign({}, project.lyricEffects, { autoPlacement: false, avoidCenter: false });
@@ -47012,6 +47013,13 @@ J.drawItem = (env, it) => {
   if (env.fx?.zmlHideNumbers && it && Z.decoTextKind(it.text)) {
     const lyric = env.cut ? String(env.cut.lineText || env.cut.text || '') : '';
     if (!lyric.includes(String(it.text).trim())) return null;
+  }
+  // over a picture the lyric gets a soft shadow, so it still reads where the picture is pale (only the words of the
+  // line; ornaments and layout props keep their own look). Layers get it once, as a whole.
+  if (env.fx?.zmlShadow && it && !it.shadow && !env.inLayer && it.text && env.cut && Number.isInteger(env.cut.part) && env.cut.line >= 0
+      && String(env.cut.lineText || env.cut.text || '').includes(String(it.text).trim().slice(0, 1))) {
+    const size = +it.size || 40;
+    it = Object.assign({}, it, { shadow: { color: 'rgba(0,0,0,.45)', blur: Math.max(3, size * 0.09), dx: 0, dy: size * 0.025 } });
   }
   return drawItem(env, it);
 };

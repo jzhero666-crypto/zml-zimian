@@ -1032,6 +1032,10 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
 .zml-lutgroup summary .zml-lut-all { margin-left: auto; padding: 2px 10px; font-size: 12px; }
 .zml-lutgroup summary .x { opacity: .55; cursor: pointer; padding: 0 4px; } .zml-lutgroup summary .x:hover { opacity: 1; color: #ff8f8f; }
 .zml-lutgroup .zml-fontlist { margin: 8px 0 4px; }
+/* 這句用了什麼 */
+.zml-nowinfo { margin: 0; min-height: 1.6em; color: #a29ea8; font-size: 13px; text-align: center; max-width: min(100%, 980px); }
+.zml-nowinfo b { color: #ece7e1; font-weight: 600; }
+.zml-nowinfo span { white-space: nowrap; margin: 0 6px; }
 
 </style>
 </head>
@@ -1119,7 +1123,7 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
   </main>
 
   <main id="zmlResult" class="zml-main" hidden>
-    <div id="zmlPreview" class="zml-preview"><canvas></canvas><audio controls></audio></div>
+    <div id="zmlPreview" class="zml-preview"><canvas></canvas><audio controls></audio><p id="zmlNowInfo" class="zml-nowinfo" aria-live="off"></p></div>
     <div class="zml-row zml-actions">
       <button id="zmlBack" type="button" class="zml-ghost">← 重新選</button>
       <button id="zmlReroll" type="button">換一版</button>
@@ -47466,6 +47470,7 @@ const draw = () => {
   const plan = J.ui.plan, scale = canvas.width / plan.W;
   J.syncMediaPreview(plan, Math.min(player.currentTime || 0, plan.duration - 0.001), !player.paused && !player.ended, true);   // background videos follow the song
   try { renderer.frame(canvas.getContext('2d'), plan, Math.min(player.currentTime || 0, plan.duration - 0.001), { scale }); } catch (e) { console.error(e); }
+  showInfo(plan, Math.min(player.currentTime || 0, plan.duration - 0.001));
 };
 const loop = () => { draw(); frameRequest = requestAnimationFrame(loop); };
 // After a jump in the song (dragging the bar, pressing play somewhere else) the videos must jump too, at once.
@@ -47485,7 +47490,23 @@ async function showResult() {
   player.play().catch(() => {});       // autoplay may be refused; the controls are there
 }
 Z.redrawPreview = () => { if (!$('zmlResult').hidden && player.paused && J.ui.plan) Z.drawPreviewAt(player.currentTime); };
-Z.drawPreviewAt = t => { player.currentTime = t; const plan = J.ui.plan; J.syncMediaPreview(plan, t, false, true); renderer.frame(canvas.getContext('2d'), plan, t, { scale: canvas.width / plan.W }); };
+/* 這句用了什麼: under the preview, the names of what the line on screen uses, to find it in 特效圖鑑 */
+let infoFor = null;
+Z.nowInfo = (plan, t) => {
+  const cut = plan.cuts.filter(c => Number.isInteger(c.part) && c.line >= 0 && t >= c.start && t < c.end).pop();
+  const name = (g, k) => (k && J.registry(g)[k]?.name) || k || '—';
+  if (!cut) return null;
+  const face = cut.fonts?.display?.[0] || plan.style?.fonts?.display?.[0];
+  return { key: cut.line + ':' + cut.part, parts: [['排版', name('layout', cut.layout)], ['進場', name('enter', cut.enter)], ['停留', name('hold', cut.hold)], ['退場', name('exit', cut.exit)], ['字體', J.FONTS[face]?.label || face || '—']].concat(cut.treat && cut.treat !== 'none' ? [['文字加工', name('treat', cut.treat)]] : []).concat((cut.decor || []).length ? [['裝飾', cut.decor.map(d => name('decor', d.id)).join('、')]] : []) };
+};
+const showInfo = (plan, t) => {
+  const box = $('zmlNowInfo'); if (!box || !plan) return;
+  const info = Z.nowInfo(plan, t), key = info ? info.key + '|' + info.parts.map(p => p[1]).join() : '';
+  if (key === infoFor) return; infoFor = key;
+  if (!info) { box.textContent = ''; return; }
+  box.replaceChildren(...info.parts.map(([k, v]) => { const s = document.createElement('span'); s.append(k + '：'); const b = document.createElement('b'); b.textContent = v; s.append(b); return s; }));
+};
+Z.drawPreviewAt = t => { player.currentTime = t; const plan = J.ui.plan; showInfo(plan, t); J.syncMediaPreview(plan, t, false, true); renderer.frame(canvas.getContext('2d'), plan, t, { scale: canvas.width / plan.W }); };
 
 /* ---------------- actions ---------------- */
 $('zmlGenerate').addEventListener('click', async () => {

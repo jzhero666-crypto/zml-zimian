@@ -1024,6 +1024,14 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
 .zml-foot a:hover { color: var(--zml-accent); }
 #zmlHome { max-width: 100vw; overflow-x: clip; }   /* nothing may make the page wider than the screen */
 @media (max-width: 760px) { #zmlGallery .zg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 4px 10px 14px; } #zmlGallery header, #zmlGallery .zg-tabs, #zmlGallery .zg-help, #zmlGallery .zg-tools, #zmlGallery footer { padding-left: 10px; padding-right: 10px; } #zmlGallery .zg-search { width: 120px; } #zmlGallery .zg-cell b { font-size: 13px; } #zmlGallery { width: 100vw; height: 100dvh; border-radius: 0; } }
+/* 濾鏡 */
+.zml-lutlist { flex: 1 1 100%; display: flex; flex-direction: column; gap: 6px; max-height: 420px; overflow-y: auto; }
+.zml-lutgroup { border: 1px solid var(--zml-line); border-radius: 10px; padding: 6px 12px; }
+.zml-lutgroup summary { cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.zml-lutgroup summary small { color: #8e8a94; font-weight: 400; }
+.zml-lutgroup summary .zml-lut-all { margin-left: auto; padding: 2px 10px; font-size: 12px; }
+.zml-lutgroup summary .x { opacity: .55; cursor: pointer; padding: 0 4px; } .zml-lutgroup summary .x:hover { opacity: 1; color: #ff8f8f; }
+.zml-lutgroup .zml-fontlist { margin: 8px 0 4px; }
 
 </style>
 </head>
@@ -1083,6 +1091,15 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
           <label class="zml-mood zml-mark-row"><b>大小</b><input id="zmlMarkSize" type="range" min="4" max="50" step="1" aria-label="浮水印大小"><span id="zmlMarkSizeValue"></span></label>
           <label class="zml-mood zml-mark-row"><b>不透明度</b><input id="zmlMarkOpacity" type="range" min="10" max="100" step="5" aria-label="浮水印不透明度"><span id="zmlMarkOpacityValue"></span></label>
           <small class="zml-mark-help">圖片也可以直接拖進這一塊。大小是以畫面短邊算的寬度，橫式直式看起來一樣大。圖片存在這個瀏覽器裡，下次打開還在；生成後也能在這裡改，預覽會馬上跟著變。</small>
+        </div>
+      </details>
+      <details id="zmlLutBox" class="zml-fonts zml-lut"><summary>濾鏡<small id="zmlLutNote"></small></summary>
+        <div class="zml-mark-body">
+          <div class="zml-mark-row"><b>用法</b><div id="zmlLutMode" class="zml-aspect" role="radiogroup" aria-label="濾鏡用法"><button type="button" data-mode="off">不用</button><button type="button" data-mode="one">整支同一個</button><button type="button" data-mode="cycle">每張背景換一個</button></div></div>
+          <label class="zml-mood zml-mark-row"><b>強度</b><input id="zmlLutStrength" type="range" min="10" max="100" step="5" aria-label="濾鏡強度"><span id="zmlLutStrengthValue"></span></label>
+          <div class="zml-ownfonts zml-mark-row"><label class="zml-addfont"><input id="zmlLutFile" type="file" accept=".cube" multiple hidden><span>＋ 加入濾鏡檔（.cube，可一次選很多）</span></label><label class="zml-addfont"><input id="zmlLutDir" type="file" webkitdirectory multiple hidden><span>＋ 加入整個資料夾</span></label><output id="zmlLutAdded"></output></div>
+          <div id="zmlLutList" class="zml-lutlist"></div>
+          <small class="zml-mark-help">只套在背景圖片和影片上，歌詞顏色不變。勾的濾鏡會被輪流使用：「整支同一個」每次生成或換一版從勾的裡面抽一個，「每張背景換一個」每換一張圖就換下一個。資料夾的名字會變成分類。加進來的濾鏡存在這個瀏覽器裡，不會上傳；別人做的濾鏡請自己確認可以使用。想看每個濾鏡的樣子，到特效圖鑑的「濾鏡」頁。</small>
         </div>
       </details>
     </section>
@@ -46387,7 +46404,7 @@ const FIXED = { res: 1080, fps: 60, lang: 'zh-Hant' };
 /* Layouts ruled out by eye on top of the measured check (13d_zml_layoutdata.js):
    hrOuija — ZML, 2026-10-13; sideways — the line lies on its side; edgeFrame — copies of the line run round the
    frame upside down (both turn the canvas, which the check does not see). */
-Z.BANNED_LAYOUTS = ['hrOuija', 'sideways', 'edgeFrame', 'hrFlashlight', 'ledScroll', 'credits', 'marquee', 'ticker', 'dotMatrix'];   // dotMatrix: draws in its own dot face, not the chosen one, and a stress run (2026-10-16) caught a 9:16 line it all but lost; hrFlashlight: lit only where a torch passes; the last four scroll the line on their own clock
+Z.BANNED_LAYOUTS = ['hrOuija', 'sideways', 'edgeFrame', 'hrFlashlight', 'ledScroll', 'credits', 'marquee', 'ticker', 'dotMatrix', 'burst'];   // burst: the line in ink on a starburst of the accent colour, which a stress run (2026-10-19) caught all but unreadable;   // dotMatrix: draws in its own dot face, not the chosen one, and a stress run (2026-10-16) caught a 9:16 line it all but lost; hrFlashlight: lit only where a torch passes; the last four scroll the line on their own clock
 /* Decorations that are drawn across the lyric (big quotes and brackets, strike-throughs, interface props) or
    add turned side text. */
 Z.BANNED_DECOR = ['bracketsJP', 'tyBigPunct', 'crossOut', 'highlightMark', 'scribbleCircle', 'tapePieces', 'counter', 'watermarkKanji', 'verticalStrip', 'romajiLine',
@@ -46537,7 +46554,8 @@ const applyLook = (project, options) => {
   // part (lines between blank lines), and subtitles have none, so the whole song would get a single entrance and layout.
   project.fx.zmlEcho = !!echo; project.themeBalance = 'lively';
   project.fx.zmlReadable = !!readable;
-  project.fx.zmlShadow = background === 'image';   // a soft shadow under the lyrics over pictures and videos
+  project.fx.zmlShadow = background === 'image';
+  project.fx.zmlLut = background === 'image' && Z.lutFx ? Z.lutFx(seed) : null;   // 濾鏡 on the pictures and videos, as the page has it   // a soft shadow under the lyrics over pictures and videos
   if (readable) Object.assign(project.fx, { glitch: project.fx.glitch * 0.3, chroma: project.fx.chroma * 0.5, decor: project.fx.decor * 0.5 });   // no viewfinder frame, counters or clocks
   // The editor's automatic placement shrinks each lyric into a random part of the frame; 簡易模式 places lyrics itself.
   project.lyricEffects = Object.assign({}, project.lyricEffects, { autoPlacement: false, avoidCenter: false });
@@ -46570,6 +46588,7 @@ Z.generate = async (options) => {
   const seed = options.seed ?? Math.floor(Math.random() * 1e9), cues = readCues(options.srtText);
   const ui = J.uiApi, S = J.ui;
   if (Z.restoreOwnFonts) await Z.restoreOwnFonts();
+  if (Z.lutsReady) await Z.lutsReady;   // the stored 濾鏡 are back before the look is set
   if (Z.markReady) await Z.markReady;   // the stored 浮水印 picture is decoded before the look is set   // faces the user added are in the catalogue before the look is picked
   const project = Z.buildProject(Object.assign({}, options, { seed }));
   if (Z.ownFonts) project.userFonts = Z.ownFonts();    // and the editor knows them too
@@ -47644,6 +47663,7 @@ const TABS = [
   ['fx', '畫面特效', '閃一下、故障、震動這類瞬間效果。'],
   ['trans', '換句轉場', '上一句怎麼換到下一句。'],
   ['media', '圖片影片', '背景圖片、影片的運鏡、色調和進退場。一個都沒動過時，簡易模式用標了「簡易會用」的那幾種；只要在這頁勾或取消過，就只用你勾著的（全部取消＝背景不動）。'],
+  ['lut', '濾鏡', '背景圖片和影片的調色（歌詞不受影響）。打勾＝會被輪流用到；用法和強度在簡易頁「濾鏡」那一塊設定。你自己加的濾鏡排在後面，用資料夾名分類。'],
 ];
 const MEDIA_SECTIONS = { enter: '進場', exit: '退場', cinema: '鏡頭', dynamic: '動態', bpm: '跟拍子', texture: '色調・質感', graphic: '分割・殘影・故障', maskFx: '遮罩', transition: '轉場', other: '其他' };
 const WHY = { small: '字太小', turned: '字是歪的', 'turned-copy': '有歪的複製字', 'partial-early': '一開始看不全', 'partial-late': '後段看不全', 'partial-middle': '中間看不全' };
@@ -47655,6 +47675,7 @@ const homeBox = (key) => [...document.querySelectorAll('#zmlFonts input, #zmlOwn
 /* ---------------- what each page lists ---------------- */
 const items = (tab) => {
   if (tab === 'style') return Z.styleChoices().map(key => ({ key, name: (Z.NAMES.styles[key] || J.STYLES[key].name), note: J.STYLES[key].zml ? J.STYLES[key].desc : '', tags: J.STYLES[key].zml ? [['pick', 'ZML 精選']] : [] }));
+  if (tab === 'lut') return [...Z.LUTS.values()].map(l => ({ key: l.key, name: l.name, section: l.group, sectionName: l.group, tags: l.builtIn ? [['pick', 'ZML 內建']] : [] }));
   if (tab === 'font') return [...document.querySelectorAll('#zmlFonts input, #zmlOwnFonts input')].map(input => ({ key: input.value, name: input.parentElement.querySelector('span').textContent, tags: Z.FONT_DATA[input.value] ? [] : [['info', '自己加的']] }));
   if (tab === 'media') {
     const used = new Set([...Z.MEDIA_MOVES, ...Z.MEDIA_WINDOWS]);
@@ -47679,6 +47700,7 @@ const FILTERS = (tab) => [['all', '全部'], ...(tab === 'style' ? [] : [['on', 
 /* ---------------- ticks: the editor's own switches ---------------- */
 const isOn = (tab, key) => tab === 'style' ? Z.homeState?.styleKey === key
   : tab === 'font' ? !!homeBox(key)?.checked
+  : tab === 'lut' ? Z.tickedLuts().includes(key)
   : tab === 'media' ? J.mediaEffectSettings(project(), 'media').enabled[key] !== false
   : (project().enabled[tab] || {})[key] !== false;
 let pending = 0;
@@ -47690,6 +47712,7 @@ const changed = (tab) => { clearTimeout(pending); pending = setTimeout(() => {
 const setOn = (tab, key, on) => {
   const p = project();
   if (tab === 'style') { document.querySelector(`#zmlStyles button[data-value="${key}"]`)?.click(); return; }
+  if (tab === 'lut') { Z.setLutTicked(key, on); Z.refreshLuts?.(); return; }
   if (tab === 'font') { const box = homeBox(key); if (box && box.checked !== on) { box.checked = on; box.dispatchEvent(new Event('change', { bubbles: true })); } return; }
   if (tab === 'media') { const next = J.mediaEffectSettings(p, 'media'); next.enabled[key] = on; p.media.effects = next; p.fx.zmlMediaPicked = true; }
   else { (p.enabled[tab] ||= {})[key] = on; p.mood = null; }
@@ -47703,6 +47726,7 @@ const keepFallback = (tab) => { const en = project().enabled[tab], key = FALLBAC
 const STYLE_SRT = SAMPLE.map((text, i) => `${i + 1}\n00:00:0${i * 3},200 --> 00:00:0${i * 3 + 2},900\n${text}\n`).join('\n');
 const build = (tab, key) => {
   if (tab === 'font') return { font: true };
+  if (tab === 'lut') return { lut: true };
   if (tab === 'style') {
     const p = Z.buildProject({ srtText: STYLE_SRT, background: 'image', themeId: null, styleKey: key, aspect: '16:9', seed: 7, mood: 0.5 });
     Object.assign(p, { res: 640, fps: 30, title: '' }); p.fx.hud = 'off'; p.fx.zmlMark = null;   // the samples show the style, not the user's 浮水印
@@ -47722,6 +47746,28 @@ const drawFont = (canvas, key) => {
   g.fillStyle = '#9fd9d1'; g.font = `${weight} 26px ${family}, sans-serif`; g.fillText('ZML 字面 0123 あア', canvas.width / 2, 132);
 };
 
+/* a look shown on the sample picture, at the strength the page has */
+/* the picture a look is shown on: the user's first background picture if there is one, else a made-up scene with
+   sky, skin, leaves, a warm light and a grey ramp — what colour looks are judged on */
+let sample = null;
+const lutSample = (w, h) => {
+  const own = (J.ui?.project?.media?.items || []).map(it => J.mediaAssets.get(it.id)).find(a => a && a.type === 'image' && a.element?.naturalWidth);
+  if (own) return own.element;
+  if (sample && sample.width === w) return sample;
+  sample = document.createElement('canvas'); sample.width = w; sample.height = h; const g = sample.getContext('2d');
+  const sky = g.createLinearGradient(0, 0, 0, h * 0.62); sky.addColorStop(0, '#3d6fa8'); sky.addColorStop(0.55, '#8fb4d6'); sky.addColorStop(1, '#f2b37a'); g.fillStyle = sky; g.fillRect(0, 0, w, h * 0.62);
+  g.fillStyle = '#ffd9a0'; g.beginPath(); g.arc(w * 0.78, h * 0.48, h * 0.09, 0, J.TAU); g.fill();
+  g.fillStyle = '#2f5d3a'; g.beginPath(); g.moveTo(0, h * 0.62); for (let x = 0; x <= w; x += w / 8) g.lineTo(x, h * (0.5 + 0.08 * Math.sin(x / w * 9))); g.lineTo(w, h * 0.62); g.fill();
+  const tones = ['#f1c7a6', '#d9a07c', '#a8714f', '#c0392b', '#e6b422', '#3a8f5c', '#2c6ea6', '#7a4fa0'];
+  tones.forEach((c, i) => { g.fillStyle = c; g.fillRect(i * w / 8, h * 0.62, w / 8 + 1, h * 0.22); });
+  for (let i = 0; i < 16; i++) { const v = Math.round(i / 15 * 255); g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(i * w / 16, h * 0.84, w / 16 + 1, h * 0.16); }
+  return sample;
+};
+const drawLut = (canvas, key) => {
+  const g = canvas.getContext('2d'), w = canvas.width, h = canvas.height, img = lutSample(w, h), iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const k = Math.max(w / iw, h / ih); g.drawImage(img, (w - iw * k) / 2, (h - ih * k) / 2, iw * k, ih * k);
+  Z.applyLut(canvas, key, (Z.lutPref().strength || 70) / 100);
+};
 let dialog, grid, state = { tab: 'layout', filter: 'all', query: '' }, frame = 0, cursor = 0;
 const visible = new Set(), live = new Map(), failed = new WeakSet();
 const drawCell = (cell, now) => {
@@ -47731,6 +47777,7 @@ const drawCell = (cell, now) => {
     let st = live.get(cell);
     if (!st) { st = build(tab, key); st.start = now; live.set(cell, st); }
     if (st.font) { drawFont(canvas, key); return; }
+    if (st.lut) { if (!st.drawn) { drawLut(canvas, key); st.drawn = true; } return; }
     // a whole style is heavy to draw: stills that change every second, moving only under the pointer or when enlarged
     if (tab === 'style' && st.last && now - st.last < 1000 && !cell.matches(':hover, .zg-big')) return;
     st.last = now;
@@ -47781,7 +47828,7 @@ const render = () => {
   const list = shown(), nodes = [];
   let section = null;
   for (const item of list) {
-    if (item.section && item.section !== section) { section = item.section; nodes.push(el('h3', 'zg-section', MEDIA_SECTIONS[section])); }
+    if (item.section && item.section !== section) { section = item.section; nodes.push(el('h3', 'zg-section', item.sectionName || MEDIA_SECTIONS[section])); }
     const cell = el('div', 'zg-cell'); cell.dataset.key = item.key; if (item.note) cell.title = item.note;
     const canvas = el('canvas'); canvas.width = 320; canvas.height = 180; canvas.setAttribute('aria-label', item.name + ' 的預覽');
     const label = el('label'), box = el('input'), name = el('b', '', item.name);
@@ -47949,6 +47996,209 @@ $('zmlMarkOpacity').addEventListener('input', e => { mark.opacity = +e.target.va
 $('zmlMarkClear').addEventListener('click', () => { mark = { src: null, on: false, pos: mark.pos, size: mark.size, opacity: mark.opacity }; Z.markImage = null; save(); apply(); });
 Z.markReady = (mark.src ? load(mark.src).then(img => { Z.markImage = img; }).catch(() => { mark.src = null; }) : Promise.resolve()).then(() => { sync(); if (mark.on) apply(); });
 sync();
+})();
+
+/* ============================================================
+   ZML — 濾鏡: colour looks (3D LUTs, .cube files) on the background pictures and videos, never on the lyrics.
+   A few looks are built in; the user adds their own .cube files, which stay in this browser (IndexedDB).
+   The look is applied on the graphics card (WebGL) to the finished background layer of each frame.
+   ============================================================ */
+(() => {
+'use strict';
+const Z = (J.zml = J.zml || {});
+if (typeof document === 'undefined' || document.documentElement.lang !== 'zh-Hant') return;
+const $ = id => document.getElementById(id);
+
+/* ---------------- the looks ---------------- */
+const N = 17;
+const clamp = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const lum = (r, g, b) => 0.299 * r + 0.587 * g + 0.114 * b;
+const curve = (v, lift, gain, gamma) => clamp(Math.pow(clamp(lift + v * (gain - lift)), gamma));
+const sat = (r, g, b, s) => { const l = lum(r, g, b); return [l + (r - l) * s, l + (g - l) * s, l + (b - l) * s]; };
+/* built-in looks, made here (no one else's presets): f(r, g, b) -> [r, g, b] */
+const BUILT = [
+  ['zl_cold', '冷藍電影', (r, g, b) => { [r, g, b] = sat(r, g, b, 0.85); return [curve(r, 0.02, 0.92, 1.08), curve(g, 0.03, 0.97, 1.02), curve(b, 0.08, 1, 0.92)]; }],
+  ['zl_warm', '暖陽膠片', (r, g, b) => { [r, g, b] = sat(r, g, b, 0.95); return [curve(r, 0.06, 1, 0.9), curve(g, 0.04, 0.96, 0.97), curve(b, 0.03, 0.84, 1.1)]; }],
+  ['zl_faded', '褪色懷舊', (r, g, b) => { [r, g, b] = sat(r, g, b, 0.7); return [curve(r, 0.12, 0.94, 1), curve(g, 0.1, 0.92, 1), curve(b, 0.12, 0.86, 1)]; }],
+  ['zl_teal', '青橙', (r, g, b) => { const l = lum(r, g, b), k = l * l * (3 - 2 * l); return [clamp(r + (k - 0.5) * 0.16), clamp(g + 0.02 * (1 - k)), clamp(b + (0.5 - k) * 0.2)]; }],
+  ['zl_mono', '黑白高反差', (r, g, b) => { const l = lum(r, g, b), c = clamp((l - 0.5) * 1.35 + 0.5); return [c, c, c]; }],
+  ['zl_violet', '夜霧紫', (r, g, b) => { [r, g, b] = sat(r, g, b, 0.8); return [curve(r, 0.05, 0.95, 1), curve(g, 0.02, 0.86, 1.08), curve(b, 0.1, 1, 0.9)]; }],
+  ['zl_mint', '清新薄荷', (r, g, b) => { [r, g, b] = sat(r, g, b, 0.9); return [curve(r, 0.04, 0.97, 0.95), curve(g, 0.06, 1, 0.92), curve(b, 0.06, 0.98, 0.95)]; }],
+];
+const tableOf = f => { const d = new Uint8Array(N * N * N * 3); let i = 0;
+  for (let b = 0; b < N; b++) for (let g = 0; g < N; g++) for (let r = 0; r < N; r++) { const o = f(r / (N - 1), g / (N - 1), b / (N - 1)); d[i++] = Math.round(clamp(o[0]) * 255); d[i++] = Math.round(clamp(o[1]) * 255); d[i++] = Math.round(clamp(o[2]) * 255); }
+  return d; };
+Z.LUTS = new Map(BUILT.map(([key, name, f]) => [key, { key, name, group: 'ZML 內建', size: N, data: tableOf(f), builtIn: true }]));
+
+/* a .cube file: LUT_3D_SIZE n, then n³ lines "r g b" with red changing fastest */
+Z.parseCube = (text) => {
+  let size = 0, min = [0, 0, 0], max = [1, 1, 1], out = null, i = 0;
+  for (const raw of String(text).split(/\r?\n/)) {
+    const line = raw.trim(); if (!line || line[0] === '#') continue;
+    if (/^LUT_3D_SIZE/i.test(line)) { size = parseInt(line.split(/\s+/)[1], 10); if (!(size >= 2 && size <= 128)) throw new Error('看不懂的格子數'); out = new Uint8Array(size ** 3 * 3); continue; }
+    if (/^LUT_1D_SIZE/i.test(line)) throw new Error('這是 1D 濾鏡，只支援 3D（.cube LUT_3D_SIZE）');
+    if (/^DOMAIN_MIN/i.test(line)) { min = line.split(/\s+/).slice(1, 4).map(Number); continue; }
+    if (/^DOMAIN_MAX/i.test(line)) { max = line.split(/\s+/).slice(1, 4).map(Number); continue; }
+    if (/^[A-Z_]/i.test(line)) continue;   // TITLE and other keywords
+    if (!out) throw new Error('缺少 LUT_3D_SIZE');
+    const v = line.split(/\s+/).map(Number); if (v.length < 3 || v.some(x => !Number.isFinite(x))) continue;
+    for (let c = 0; c < 3; c++) out[i++] = Math.round(clamp((v[c] - min[c]) / ((max[c] - min[c]) || 1)) * 255);
+  }
+  if (!out || i !== out.length) throw new Error('數值數量不對');
+  return { size, data: out };
+};
+
+/* ---------------- the user's own looks, kept in this browser ---------------- */
+const DB = 'zml-luts', STORE = 'luts';
+const db = () => new Promise((done, fail) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(STORE, { keyPath: 'key' }); r.onsuccess = () => done(r.result); r.onerror = () => fail(r.error); });
+const tx = async (mode, fn) => { const d = await db(); return new Promise((done, fail) => { const t = d.transaction(STORE, mode), s = t.objectStore(STORE), r = fn(s); t.oncomplete = () => done(r && r.result); t.onerror = () => fail(t.error); }); };
+Z.lutsReady = (async () => {
+  try { const all = await tx('readonly', s => s.getAll()); for (const l of all || []) Z.LUTS.set(l.key, Object.assign(l, { data: new Uint8Array(l.data) })); } catch (e) {}
+})();
+const keyOf = (group, name) => 'zu_' + (group + '/' + name).replace(/\s+/g, '_');
+/* files may be loose .cube files or come from a folder (their folder becomes the group) */
+Z.addLutFiles = async (files) => {
+  const cubes = files.filter(f => /[.]cube$/i.test(f.name)), added = [], bad = [];
+  for (const file of cubes) {
+    try {
+      const { size, data } = Z.parseCube(await file.text());
+      const path = (file.webkitRelativePath || file.zmlPath || '').split('/').filter(Boolean), group = path.length > 1 ? path[path.length - 2] : (file.name.replace(/[.]cube$/i, '').replace(/[\s_\-]*\d+$/, '').trim() || '我加的濾鏡');   // no folder: the name without its number (人像聚焦12 -> 人像聚焦)
+      // "分類__名稱.cube" names its group itself (how files keep their folder when sent without it)
+      const bare = file.name.replace(/[.]cube$/i, ''), parts = bare.split('__'), name = parts.length > 1 ? parts.slice(1).join('__') : bare;
+      const g = (parts.length > 1 ? parts[0] : group).replace(/[-_]?影片$/, ''), key = keyOf(g, name), lut = { key, name, group: g, size, data };
+      Z.LUTS.set(key, lut); added.push(key);
+      try { await tx('readwrite', s => s.put(Object.assign({}, lut, { data: lut.data.buffer.slice(0) }))); } catch (e) {}
+    } catch (e) { bad.push(file.name); }
+  }
+  return { added, bad, skipped: files.length - cubes.length };
+};
+Z.removeLutGroup = async (group) => {
+  for (const [key, l] of [...Z.LUTS]) if (l.group === group && !l.builtIn) { Z.LUTS.delete(key); try { await tx('readwrite', s => s.delete(key)); } catch (e) {} }
+};
+
+/* ---------------- what the page has chosen ---------------- */
+const PREF = 'zml.lut.v1';
+let pref = (() => { try { return Object.assign({ mode: 'off', strength: 70, ticked: [] }, JSON.parse(localStorage.getItem(PREF) || '{}')); } catch (e) { return { mode: 'off', strength: 70, ticked: [] }; } })();
+const savePref = () => { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) {} };
+Z.lutPref = () => pref;
+Z.tickedLuts = () => pref.ticked.filter(k => Z.LUTS.has(k));
+Z.setLutTicked = (key, on) => { pref.ticked = pref.ticked.filter(k => k !== key); if (on) pref.ticked.push(key); savePref(); changed(); };
+/* what a project carries: the order the looks come in for this seed (the tables stay here) */
+Z.lutFx = (seed = 0) => {
+  const keys = Z.tickedLuts(); if (pref.mode === 'off' || !keys.length) return null;
+  const rnd = J.rng(seed + 7177), order = keys.slice().sort(() => rnd() - 0.5);
+  return { mode: pref.mode, strength: pref.strength, keys: pref.mode === 'one' ? [order[0]] : order };
+};
+
+/* ---------------- applying a look on the graphics card ---------------- */
+let gl = null, glCanvas = null, prog = null, srcTex = null, lutTex = null, lutOn = null, broken = false;
+const VS = 'attribute vec2 p;varying vec2 uv;void main(){uv=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}';
+const FS = 'precision mediump float;varying vec2 uv;uniform sampler2D src;uniform sampler2D lut;uniform float n;uniform float k;' +
+  'vec3 at(float r,float g,float b){return texture2D(lut,vec2((r+b*n+.5)/(n*n),(g+.5)/n)).rgb;}' +
+  'void main(){vec4 c=texture2D(src,uv);if(c.a<.002){gl_FragColor=vec4(0.);return;}vec3 v=clamp(c.rgb,0.,1.)*(n-1.);' +
+  'vec3 f=floor(v),t=v-f,u=min(f+1.,n-1.);' +   // trilinear: red and green inside a slice, blue between two slices
+  'vec3 b0=mix(mix(at(f.r,f.g,f.b),at(u.r,f.g,f.b),t.r),mix(at(f.r,u.g,f.b),at(u.r,u.g,f.b),t.r),t.g);' +
+  'vec3 b1=mix(mix(at(f.r,f.g,u.b),at(u.r,f.g,u.b),t.r),mix(at(f.r,u.g,u.b),at(u.r,u.g,u.b),t.r),t.g);' +
+  'vec3 o=mix(c.rgb,mix(b0,b1,t.b),k);gl_FragColor=vec4(o*c.a,c.a);}';
+const setup = () => {
+  if (gl || broken) return !!gl;
+  try {
+    glCanvas = document.createElement('canvas');
+    gl = glCanvas.getContext('webgl', { premultipliedAlpha: true, preserveDrawingBuffer: true, antialias: false });
+    if (!gl) throw new Error('no webgl');
+    const sh = (type, code) => { const s = gl.createShader(type); gl.shaderSource(s, code); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+    prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const tex = unit => { const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, p, v); return t; };
+    srcTex = tex(0); lutTex = tex(1);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, srcTex); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.uniform1i(gl.getUniformLocation(prog, 'src'), 0); gl.uniform1i(gl.getUniformLocation(prog, 'lut'), 1);
+    return true;
+  } catch (e) { broken = true; gl = null; console.warn('濾鏡：這台電腦的瀏覽器不能用顯示卡算濾鏡', e); return false; }
+};
+/* canvas -> the same canvas, with the look applied at strength k (0…1) */
+Z.applyLut = (canvas, key, k) => {
+  const lut = Z.LUTS.get(key); if (!lut || !(k > 0) || !setup()) return false;
+  const w = canvas.width, h = canvas.height; if (!w || !h) return false;
+  if (glCanvas.width !== w || glCanvas.height !== h) { glCanvas.width = w; glCanvas.height = h; }
+  gl.viewport(0, 0, w, h);
+  if (lutOn !== key) {   // the table as a picture n² wide and n high: one n×n slice per blue step, side by side
+    const n = lut.size, rgba = new Uint8Array(n * n * n * 4);
+    for (let b = 0; b < n; b++) for (let g = 0; g < n; g++) for (let r = 0; r < n; r++) { const i = (r + g * n + b * n * n) * 3, o = (g * n * n + b * n + r) * 4; rgba[o] = lut.data[i]; rgba[o + 1] = lut.data[i + 1]; rgba[o + 2] = lut.data[i + 2]; rgba[o + 3] = 255; }
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, lutTex); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, n * n, n, 0, gl.RGBA, gl.UNSIGNED_BYTE, rgba);
+    gl.uniform1f(gl.getUniformLocation(prog, 'n'), n); lutOn = key;
+  }
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, srcTex); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+  gl.uniform1f(gl.getUniformLocation(prog, 'k'), J.clamp(k, 0, 1));
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  const x = canvas.getContext('2d'); x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.filter = 'none'; x.globalCompositeOperation = 'copy'; x.drawImage(glCanvas, 0, 0); x.restore();
+  return true;
+};
+/* which look is on screen at time t: one for the whole song, or the next ticked one at every background cut */
+Z.lutAt = (plan, t) => {
+  const L = plan.fx?.zmlLut; if (!L || !L.keys?.length) return null;
+  if (L.mode !== 'cycle' || L.keys.length === 1) return L.keys[0];
+  const cut = J.mediaAt(plan, t, 'media'); return L.keys[((cut?.index ?? 0) % L.keys.length + L.keys.length) % L.keys.length];
+};
+/* the background layer is finished by J.drawMedia; the look goes on it before it is laid under the lyrics */
+const drawMedia = J.drawMedia;
+J.drawMedia = function (ctx, plan, t, owner, layer = 'media', ...rest) {
+  const done = drawMedia.call(this, ctx, plan, t, owner, layer, ...rest);
+  if (layer === 'media' && plan?.fx?.zmlLut) { const key = Z.lutAt(plan, t); if (key) Z.applyLut(ctx.canvas, key, (plan.fx.zmlLut.strength ?? 70) / 100); }
+  return done;
+};
+
+/* ---------------- the controls on the 簡易 page ---------------- */
+const home = document.getElementById('zmlHome'); if (!home) return;
+let pending = 0;
+function changed() {
+  const p = J.ui?.project; if (p?.fx && p.media?.items?.length) { p.fx.zmlLut = Z.lutFx(p.seed); if (J.ui.plan?.fx) J.ui.plan.fx.zmlLut = p.fx.zmlLut; }
+  clearTimeout(pending); pending = setTimeout(() => { if (Z.redrawPreview) Z.redrawPreview(); }, 60);
+  sync();
+}
+const groups = () => { const m = new Map(); for (const l of Z.LUTS.values()) (m.get(l.group) || m.set(l.group, []).get(l.group)).push(l); for (const list of m.values()) list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant', { numeric: true })); return m; };
+function build() {
+  const box = $('zmlLutList'); if (!box) return;
+  const nodes = [];
+  for (const [group, list] of groups()) {
+    const d = document.createElement('details'); d.className = 'zml-lutgroup'; d.open = list.some(l => pref.ticked.includes(l.key)) && list.length <= 12;
+    const on = list.filter(l => pref.ticked.includes(l.key)).length;
+    const sum = document.createElement('summary'); sum.textContent = `${group}　`; const c = document.createElement('small'); c.textContent = `${on} / ${list.length}`; sum.append(c);
+    const all = document.createElement('button'); all.type = 'button'; all.className = 'zml-ghost zml-lut-all'; all.textContent = on === list.length ? '全取消' : '全勾';
+    all.addEventListener('click', e => { e.preventDefault(); const want = on !== list.length; for (const l of list) { pref.ticked = pref.ticked.filter(k => k !== l.key); if (want) pref.ticked.push(l.key); } savePref(); changed(); build(); });
+    sum.append(all);
+    if (!list[0].builtIn) { const x = document.createElement('span'); x.className = 'x'; x.textContent = '×'; x.title = '移除這組濾鏡'; x.addEventListener('click', async e => { e.preventDefault(); if (!confirm(`移除「${group}」這組 ${list.length} 個濾鏡？`)) return; await Z.removeLutGroup(group); pref.ticked = pref.ticked.filter(k => Z.LUTS.has(k)); savePref(); changed(); build(); }); sum.append(x); }
+    d.append(sum);
+    const grid = document.createElement('div'); grid.className = 'zml-fontlist';
+    for (const l of list) { const row = document.createElement('label'), b = document.createElement('input'), s = document.createElement('span'); b.type = 'checkbox'; b.value = l.key; b.checked = pref.ticked.includes(l.key); b.addEventListener('change', () => { Z.setLutTicked(l.key, b.checked); c.textContent = `${list.filter(x => pref.ticked.includes(x.key)).length} / ${list.length}`; }); s.textContent = l.name; row.append(b, s); grid.append(row); }
+    d.append(grid); nodes.push(d);
+  }
+  box.replaceChildren(...nodes);
+  sync();
+}
+function sync() {
+  const n = Z.tickedLuts().length;
+  for (const b of home.querySelectorAll('#zmlLutMode button')) b.setAttribute('aria-pressed', b.dataset.mode === pref.mode);
+  if ($('zmlLutStrength')) { $('zmlLutStrength').value = pref.strength; $('zmlLutStrengthValue').textContent = pref.strength + '%'; }
+  if ($('zmlLutNote')) $('zmlLutNote').textContent = pref.mode === 'off' ? '不用濾鏡' : !n ? '還沒勾任何濾鏡' : pref.mode === 'one' ? `整支用同一個（從勾的 ${n} 個裡抽，換一版會換）` : `背景每換一張就換一個（勾了 ${n} 個）`;
+}
+Z.refreshLuts = build;
+for (const b of home.querySelectorAll('#zmlLutMode button')) b.addEventListener('click', () => { pref.mode = b.dataset.mode; savePref(); changed(); });
+$('zmlLutStrength')?.addEventListener('input', e => { pref.strength = +e.target.value; savePref(); changed(); });
+const add = async files => {
+  const out = $('zmlLutAdded'); out.textContent = '讀取中…';
+  const r = await Z.addLutFiles(files);
+  for (const k of r.added) if (!pref.ticked.includes(k)) pref.ticked.push(k);
+  if (r.added.length && pref.mode === 'off') pref.mode = 'one';
+  savePref(); build(); changed();
+  out.textContent = r.added.length ? `加了 ${r.added.length} 個濾鏡，已經幫你勾起來` + (r.bad.length ? `；${r.bad.length} 個讀不了` : '') : '裡面沒有能用的 .cube 濾鏡';
+};
+for (const id of ['zmlLutFile', 'zmlLutDir']) $(id)?.addEventListener('change', e => { const f = [...e.target.files]; e.target.value = ''; add(f); });
+Z.lutsReady.then(build);
 })();
 
 </script>

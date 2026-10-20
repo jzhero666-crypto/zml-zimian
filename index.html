@@ -1098,6 +1098,8 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
           <small class="zml-mark-help">圖片也可以直接拖進這一塊。大小是以畫面短邊算的寬度，橫式直式看起來一樣大。圖片存在這個瀏覽器裡，下次打開還在；生成後也能在這裡改，預覽會馬上跟著變。</small>
         </div>
       </details>
+      <label class="zml-check"><input id="zmlSlashOn" type="checkbox"><span>斜色塊</span><small>背景變黑白，每一下大鼓都有一條彩色斜條，從上下左右斜的不同角度劃過畫面再消失（要放圖片或影片才有效）</small></label>
+      <label id="zmlSlashRow" class="zml-mood zml-sub" hidden><span>少</span><input id="zmlSlashAmount" type="range" min="0" max="100" step="5" value="50" aria-label="斜色塊的多寡"><span>多</span><b id="zmlSlashValue">50%</b><small>往左：只跟重的鼓；中間以上：每一下鼓都有；再往右：常常兩條一起來</small></label>
       <details id="zmlLutBox" class="zml-fonts zml-lut"><summary>濾鏡<small id="zmlLutNote"></small></summary>
         <div class="zml-mark-body">
           <div class="zml-mark-row"><b>用法</b><div id="zmlLutMode" class="zml-aspect" role="radiogroup" aria-label="濾鏡用法"><button type="button" data-mode="off">不用</button><button type="button" data-mode="one">整支同一個</button><button type="button" data-mode="cycle">每張背景換一個</button></div></div>
@@ -46565,6 +46567,7 @@ const applyLook = (project, options) => {
   project.fx.zmlReadable = !!readable;
   project.fx.zmlShadow = background === 'image';
   project.fx.zmlShadowAmount = J.clamp(Number.isFinite(+pick('shadow')) && pick('shadow') !== undefined ? +pick('shadow') : 60, 0, 100);
+  project.fx.zmlSlash = background === 'image' && Z.slashFx ? Z.slashFx(seed) : null;   // 斜色塊, as the page has it
   project.fx.zmlLut = background === 'image' && Z.lutFx ? Z.lutFx(seed) : null;   // 濾鏡 on the pictures and videos, as the page has it   // a soft shadow under the lyrics over pictures and videos
   if (readable) Object.assign(project.fx, { glitch: project.fx.glitch * 0.3, chroma: project.fx.chroma * 0.5, decor: project.fx.decor * 0.5 });   // no viewfinder frame, counters or clocks
   // The editor's automatic placement shrinks each lyric into a random part of the frame; 簡易模式 places lyrics itself.
@@ -46608,6 +46611,7 @@ Z.generate = async (options) => {
   await ui.loadAudioFile(options.audioFile, { matchDuration: true, background: false });
   if (!S.audio || S.audioFile?.name !== options.audioFile.name) throw new Error('讀不了這個音檔');
   S.audio.zmlHits = Z.findHits(S.audio.buffer);   // where the drum really lands, for the pulse
+  S.audio.zmlKicks = Z.findHits(S.audio.buffer, { near: 20, over: 0, rise: 0.01, floor: 0.02 });   // every kick, for 斜色塊
   // Subtitles never make the video longer than the song.
   const length = S.audio.duration, kept = cues.filter(cue => cue.start < length - 0.1).map(cue => Object.assign({}, cue, { end: Math.min(cue.end, length) }));
   if (!kept.length) throw new Error('字幕檔沒有可用的歌詞');
@@ -47123,7 +47127,7 @@ function drawInterlude(ctx, plan, t, gap) {
 /* ---------------- pulse on the drum ---------------- */
 /* Where the low drum actually lands in this recording — not a tempo grid, which keeps ticking through quiet
    passages and drifts off real hits. -> { t: [seconds], s: [strength 0..1] } */
-Z.findHits = (buffer) => {
+Z.findHits = (buffer, { near = 12, over = 2.2, rise: least = 0.06, floor = 0.12 } = {}) => {   // 斜色塊 asks for a looser set: every kick, not just the big ones
   const rate = buffer.sampleRate, length = buffer.length, channels = buffer.numberOfChannels;
   const hop = Math.round(rate / 100), frames = Math.floor(length / hop), low = new Float32Array(frames);
   const data = Array.from({ length: channels }, (_, c) => buffer.getChannelData(c));
@@ -47146,11 +47150,11 @@ Z.findHits = (buffer) => {
   for (let f = 6; f < frames; f++) { let before = 0; for (let b = 3; b <= 6; b++) before += low[f - b]; rise[f] = Math.max(0, low[f] - before / 4 * 1.25) / peak; }
   for (let f = 6; f < frames - 3; f++) {
     const r = rise[f];
-    if (r < 0.06 || low[f] < peak * 0.12) continue;
+    if (r < least || low[f] < peak * floor) continue;
     let top = true, around = 0, n = 0;
-    for (let d = -12; d <= 12; d++) { const g = f + d; if (g < 0 || g >= frames || d === 0) continue; if (rise[g] > r) top = false; }
+    for (let d = -near; d <= near; d++) { const g = f + d; if (g < 0 || g >= frames || d === 0) continue; if (rise[g] > r) top = false; }
     for (let d = -50; d <= 50; d++) { const g = f + d; if (g >= 0 && g < frames) { around += rise[g]; n++; } }
-    if (top && r > around / n * 2.2) { t.push(+(f * hop / rate).toFixed(3)); s.push(r); }
+    if (top && r > around / n * over) { t.push(+(f * hop / rate).toFixed(3)); s.push(r); }
   }
   // strength relative to this song's strong hits
   const sorted = s.slice().sort((a, b) => a - b), strong = sorted[Math.floor(sorted.length * 0.9)] || 1;
@@ -47159,7 +47163,7 @@ Z.findHits = (buffer) => {
 // the hits ride on the audio the plan was made with
 const plan = J.plan;
 J.plan = function (project, audio, ...rest) {
-  const made = plan.call(this, project, audio, ...rest); made.zmlHits = audio?.zmlHits || null;
+  const made = plan.call(this, project, audio, ...rest); made.zmlHits = audio?.zmlHits || null; made.zmlKicks = audio?.zmlKicks || null;
   // the name shown in interludes is the project's title as it is now (it can be changed in the editor)
   if (project?.fx?.zml && project.title && project.fx.zmlTitle !== project.title) project.fx.zmlTitle = made.fx.zmlTitle = project.title;
   if (project?.fx?.zml) Z.titleFace(project, made);
@@ -48303,6 +48307,124 @@ const add = async files => {
 };
 for (const id of ['zmlLutFile', 'zmlLutDir']) $(id)?.addEventListener('change', e => { const f = [...e.target.files]; e.target.value = ''; add(f); });
 Z.lutsReady.then(build);
+})();
+
+/* ============================================================
+   ZML — 斜色塊: the background turns black and white, and slanted strips of the colour picture sweep in, one
+   after another — on the real drum hits and where a line starts — hold a moment and fade (the 《藤蔓》 look).
+   Only the background pictures and videos; never the lyrics.
+   ============================================================ */
+(() => {
+'use strict';
+const Z = (J.zml = J.zml || {});
+if (typeof document === 'undefined' || document.documentElement.lang !== 'zh-Hant') return;
+const $ = id => document.getElementById(id);
+
+/* ---------------- what the page has chosen ---------------- */
+const PREF = 'zml.slash.v1';
+let pref = (() => { try { return Object.assign({ on: false, amount: 50 }, JSON.parse(localStorage.getItem(PREF) || '{}')); } catch (e) { return { on: false, amount: 50 }; } })();
+const savePref = () => { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) {} };
+Z.slashPref = () => pref;
+/* what a project carries; the seed decides where the strips fall, so 換一版 moves them */
+Z.slashFx = (seed = 0) => pref.on ? { amount: pref.amount, seed } : null;
+
+/* ---------------- when the strips come ---------------- */
+const SLIDE = 0.14, FADE = 0.22;
+const ease = x => 1 - Math.pow(1 - J.clamp(x), 3);
+const eventCache = new WeakMap();
+/* -> { list: [{ t, strips: [...] }] }: a strip on every drum hit (the 少↔多 slider sets how soft a hit still
+   counts); only a song with no drum found falls back to the line starts. Every hit sends its strip from a new direction — left, right, up, down or
+   diagonal — like a shock wave crossing the frame. Direction, place, width and life are fixed by the seed. */
+Z.slashEvents = (plan) => {
+  const S = plan.fx?.zmlSlash; if (!S) return {};
+  const cached = eventCache.get(plan); if (cached && cached.S === S) return cached.out;
+  const a = J.clamp((S.amount ?? 50) / 100), spacing = 0.12, hitFloor = 0.35 * Math.max(0, 1 - 2 * a);   // from the middle up every kick counts; further right adds doubles
+  const times = [];
+  const hits = plan.zmlKicks || plan.zmlHits; if (hits) hits.t.forEach((t, i) => { if (hits.s[i] >= hitFloor) times.push([t, hits.s[i]]); });
+  if (times.length < 4) { const firsts = new Map(); for (const c of plan.cuts) if (Number.isInteger(c.part) && c.line >= 0 && !(firsts.get(c.line) <= c.start)) firsts.set(c.line, c.start); for (const t of firsts.values()) times.push([t, 0.7]); }
+  times.sort((x, y) => x[0] - y[0]);
+  const rnd = J.rng((S.seed || 0) + 9133), list = [];
+  let last = -1e9, prev = rnd() * 8 | 0;
+  for (const [t, s] of times) {
+    if (t - last < spacing) continue;
+    last = t;
+    const strips = [], n = s > 0.8 - 0.4 * a && rnd() < 0.2 + 0.4 * a ? 2 : 1;
+    for (let k = 0; k < n; k++) {
+      // one of eight directions, at least 90° away from the one before, a little off the exact angle
+      let d; do d = rnd() * 8 | 0; while (Math.min((d - prev + 8) % 8, (prev - d + 8) % 8) < 2); prev = d;
+      // short: gone by the next hit or soon after, so the strips follow the drum
+      strips.push({ ang: d * Math.PI / 4 + (rnd() - 0.5) * 0.35, rest: (rnd() - 0.5) * 0.7, w: 0.16 + rnd() * 0.3, lean: (rnd() - 0.5) * 0.7,
+        life: 0.25 + rnd() * 0.25 + s * 0.25, delay: k * 0.05, drift: 0.03 + rnd() * 0.04,
+        shift: rnd() < 0.3 ? (rnd() - 0.5) * 0.08 : 0, zoom: rnd() < 0.3 ? 1.04 + rnd() * 0.06 : 1 });
+    }
+    list.push({ t, strips });
+  }
+  const out = { list };
+  eventCache.set(plan, { S, out });
+  return out;
+};
+
+/* ---------------- drawing ---------------- */
+const colour = document.createElement('canvas');
+/* the finished background layer -> black and white, with the strips on screen at time t in colour */
+Z.drawSlash = (ctx, plan, t) => {
+  const ev = Z.slashEvents(plan); if (!ev.list) return;
+  const c = ctx.canvas, w = c.width, h = c.height; if (!w || !h) return;
+  if (colour.width !== w || colour.height !== h) { colour.width = w; colour.height = h; }
+  const g = colour.getContext('2d'); g.globalCompositeOperation = 'copy'; g.drawImage(c, 0, 0);
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'copy'; ctx.filter = 'grayscale(1) contrast(1.08) brightness(0.92)'; ctx.drawImage(colour, 0, 0);
+  ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
+  // only the events that can still be on screen: none lives longer than about 2.5 s
+  let lo = 0, hi = ev.list.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (ev.list[mid].t < t - 3) lo = mid + 1; else hi = mid; }
+  const R = Math.hypot(w, h) / 2;
+  const paint = (s, from, to, alpha) => {
+    // a band across the whole frame, slanted by s.lean, between from and to along the direction it travels
+    ctx.save();
+    ctx.setTransform(Math.cos(s.ang), Math.sin(s.ang), -Math.sin(s.ang), Math.cos(s.ang), w / 2, h / 2);
+    ctx.beginPath(); ctx.moveTo(from - s.lean * R, -R); ctx.lineTo(to - s.lean * R, -R); ctx.lineTo(to + s.lean * R, R); ctx.lineTo(from + s.lean * R, R); ctx.closePath();
+    ctx.clip(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = alpha;
+    if (s.zoom !== 1 || s.shift) ctx.drawImage(colour, (w - w * s.zoom) / 2 + s.shift * w, (h - h * s.zoom) / 2, w * s.zoom, h * s.zoom);   // a misregistered copy, like a cut-out laid on top
+    else ctx.drawImage(colour, 0, 0);
+    ctx.restore();
+  };
+  for (let i = lo; i < ev.list.length && ev.list[i].t <= t; i++) {
+    for (const s of ev.list[i].strips) {
+      const age = t - ev.list[i].t - s.delay; if (age < 0 || age > s.life + FADE) continue;
+      const alpha = (age > s.life ? 1 - (age - s.life) / FADE : 1) * J.clamp(age / 0.04); if (alpha <= 0) continue;
+      // shoots in from beyond the edge, settles somewhere across the frame and keeps creeping on the same way
+      const half = s.w * R / 2, start = -R - half - Math.abs(s.lean) * R, p = start + (s.rest * R - start) * ease(age / SLIDE) + s.drift * R * age;
+      if (age < SLIDE * 1.5) paint(s, p - half - R * 0.5 * (1 - age / (SLIDE * 1.5)), p - half, alpha * 0.35 * (1 - age / (SLIDE * 1.5)));   // the wake behind it
+      paint(s, p - half, p + half, alpha);
+    }
+  }
+  ctx.restore();
+};
+/* after the 濾鏡 (17 wraps J.drawMedia first), so the strips show the graded colour */
+const drawMedia = J.drawMedia;
+J.drawMedia = function (ctx, plan, t, owner, layer = 'media', ...rest) {
+  const done = drawMedia.call(this, ctx, plan, t, owner, layer, ...rest);
+  if (layer === 'media' && plan?.fx?.zmlSlash) Z.drawSlash(ctx, plan, t);
+  return done;
+};
+
+/* ---------------- the controls on the 簡易 page ---------------- */
+const home = document.getElementById('zmlHome'); if (!home) return;
+let pending = 0;
+function changed() {
+  const p = J.ui?.project; if (p?.fx && p.media?.items?.length) { p.fx.zmlSlash = Z.slashFx(p.seed); if (J.ui.plan?.fx) J.ui.plan.fx.zmlSlash = p.fx.zmlSlash; }
+  clearTimeout(pending); pending = setTimeout(() => { if (Z.redrawPreview) Z.redrawPreview(); }, 60);
+  sync();
+}
+function sync() {
+  if ($('zmlSlashOn')) $('zmlSlashOn').checked = !!pref.on;
+  if ($('zmlSlashRow')) $('zmlSlashRow').hidden = !pref.on;
+  if ($('zmlSlashAmount')) { $('zmlSlashAmount').value = pref.amount; $('zmlSlashValue').textContent = pref.amount + '%'; }
+}
+$('zmlSlashOn')?.addEventListener('change', e => { pref.on = e.target.checked; savePref(); changed(); });
+$('zmlSlashAmount')?.addEventListener('input', e => { pref.amount = +e.target.value; savePref(); changed(); });
+sync();
 })();
 
 </script>

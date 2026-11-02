@@ -1118,6 +1118,7 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
           <small class="zml-mark-help">圖片也可以直接拖進這一塊。大小是以畫面短邊算的寬度，橫式直式看起來一樣大。圖片存在這個瀏覽器裡，下次打開還在；生成後也能在這裡改，預覽會馬上跟著變。</small>
         </div>
       </details>
+      <label class="zml-check"><input id="zmlGlowOn" type="checkbox" checked><span>柔光</span><small>黑底、白底時整個畫面加一層淡淡的發光，白字會微微暈開。不想要就取消勾選（特效圖鑑的勾選管不到這一層；用圖片影片當背景時本來就沒有）；改了預覽會馬上跟著變</small></label>
       <label class="zml-check"><input id="zmlSlashOn" type="checkbox"><span>斜色塊</span><small>背景變黑白，每一下大鼓都有一條彩色斜條，從上下左右斜的不同角度劃過畫面再消失（要放圖片或影片才有效）</small></label>
       <label id="zmlSlashRow" class="zml-mood zml-sub" hidden><span>少</span><input id="zmlSlashAmount" type="range" min="0" max="100" step="5" value="50" aria-label="斜色塊的多寡"><span>多</span><b id="zmlSlashValue">50%</b><small>往左：只跟重的鼓；中間以上：每一下鼓都有；再往右：常常兩條一起來</small></label>
       <label class="zml-check"><input id="zmlBandOn" type="checkbox"><span>橫框換圖</span><small>圖片放在畫面中間一條橫框裡，每句歌詞開頭和重拍都換一次：換下一張圖，或同一張換成半身、特寫、上下兩格；換法有直接切、推移、放大切入、故障、3D 翻轉、3D 翻牌。歌詞排在框的上下。只用圖片，影片不會放進框裡</small></label>
@@ -9721,7 +9722,7 @@ class Renderer {
     const fx = effectCut?.effectFx || plan.fx, st = effectCut?.effectStyle || plan.style;
     const active = plan.events.filter(ev => t >= ev.t && t < ev.t + Math.max(ev.dur, 1 / plan.fps));
     const baseEvent=ev=>J.FXE[ev.type]?.customBase?{...ev,type:J.FXE[ev.type].customBase}:ev;
-    const needScratch = active.map(baseEvent).some(ev => ['slice', 'block', 'zoom', 'mosaic'].includes(ev.type) || (J.FXE[ev.type] && J.FXE[ev.type].scratch)) || (!opt.fast && (st.glow || 0) > 0);
+    const needScratch = active.map(baseEvent).some(ev => ['slice', 'block', 'zoom', 'mosaic'].includes(ev.type) || (J.FXE[ev.type] && J.FXE[ev.type].scratch)) || (!opt.fast && !plan.fx?.zmlNoGlow && (st.glow || 0) > 0);
     const S = needScratch ? this.ensure(this.scratch, cw, ch) : null;
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
     const copy = () => { const sx = S.getContext('2d'); sx.globalCompositeOperation = 'copy'; sx.drawImage(ctx.canvas, 0, 0); sx.globalCompositeOperation = 'source-over'; };
@@ -9779,7 +9780,7 @@ class Renderer {
       J.drawCustomEvent?.(ctx,event,k,sc);
     }
     // bloom
-    const glow = (st.glow ?? 0.6) * 0.5 * (fx.texture ?? 0.6);
+    const glow = plan.fx?.zmlNoGlow ? 0 : (st.glow ?? 0.6) * 0.5 * (fx.texture ?? 0.6);   // ZML: 柔光 can be switched off on the home page
     if (!opt.fast && allowFilter && glow > 0.05 && !opt.transparent) {
       const sw = Math.round(cw / 4), sh = Math.round(ch / 4);
       const Sm = this.ensure(this.small, sw, sh), sx = Sm.getContext('2d');
@@ -46563,10 +46564,11 @@ const applyLook = (project, options) => {
     if (J.STYLES[styleKey]) project.style = styleKey;
   }
   project.seed = seed;   // omakase returns a seed of its own
+  keepUserTicks(project, ['layout']);
   // layouts: only the allowed ones; when the theme's own choice leaves too few, every allowed layout.
   // 我的樣式 keeps exactly what was ticked in the editor — that choice is the point of it.
   const layouts = project.enabled.layout, chosen = Object.keys(layouts).filter(key => layouts[key] && Z.layoutAllowed(key));
-  if (!preset) for (const key of Object.keys(layouts)) layouts[key] = chosen.length >= 8 ? chosen.includes(key) : Z.layoutAllowed(key);
+  if (!preset && !Z.userTicks.layout) for (const key of Object.keys(layouts)) layouts[key] = chosen.length >= 8 ? chosen.includes(key) : Z.layoutAllowed(key);
   if (typeOnly || centerClear) {   // a band along the top or bottom has room for type, not for props
     const plain = (centerClear ? Z.BAND_LAYOUTS : Z.TYPE_ONLY_LAYOUTS).filter(key => key in layouts && Z.layoutAllowed(key)), kept = plain.filter(key => layouts[key]);
     // a saved look never gets back a layout it unticked: only its own that fit, or (none fit) its own as they are
@@ -46586,6 +46588,7 @@ const applyLook = (project, options) => {
   project.fx = Object.assign({}, project.fx, { koma: 0, onTwos: false });
   setFonts(project, fontPool || null);
   project.fx.zmlMediaPicked = !!(preset && preset.zml.mediaEnabled);
+  keepUserTicks(project, Object.keys(Z.userTicks).filter(group => group !== 'layout'));   // after the bans: a hand tick is the user's call
   // a look keeps the amounts it was saved with (perhaps tuned in the editor) unless the slider was moved away from them
   if (preset && Math.abs((+mood || 0) - (+preset.zml.mood || 0)) < 0.005) Object.assign(project.fx, { zml: true, zmlMood: J.clamp(+mood || 0), zmlPulse: J.lerp(0.35, 1.3, J.clamp(+mood || 0)) });
   else setMood(project, mood);
@@ -46598,6 +46601,7 @@ const applyLook = (project, options) => {
   project.fx.zmlShadow = background === 'image';
   project.fx.zmlShadowAmount = J.clamp(Number.isFinite(+pick('shadow')) && pick('shadow') !== undefined ? +pick('shadow') : 60, 0, 100);
   project.fx.zmlSlash = background === 'image' && Z.slashFx ? Z.slashFx(seed) : null;   // 斜色塊, as the page has it
+  project.fx.zmlNoGlow = Z.glowPref ? !Z.glowPref().on : false;   // 柔光 (src/20), as the page has it
   project.fx.zmlBandOn = band; project.fx.zmlBand = null;   // 橫框換圖 (src/16z)
   project.fx.zmlLut = background === 'image' && Z.lutFx ? Z.lutFx(seed) : null;   // 濾鏡 on the pictures and videos, as the page has it   // a soft shadow under the lyrics over pictures and videos
   if (readable) Object.assign(project.fx, { glitch: project.fx.glitch * 0.3, chroma: project.fx.chroma * 0.5, decor: project.fx.decor * 0.5 });   // no viewfinder frame, counters or clocks
@@ -46618,6 +46622,23 @@ const applyLook = (project, options) => {
   const from = tone || schemes[0];
   project.colors = Object.assign({}, project.colors, { enabled: true, allSchemes: true }, plain, { accentOn: true, accent: from.accent, accent2: from.accent2, ghostA: from.ghostA, ghostB: from.ghostB });
   return project;
+};
+
+/* What was ticked or unticked by hand in 特效圖鑑 (group -> {key: on}). A fresh draw (換一版, 生成) picks a new random
+   set of techniques; without this the user's choice was thrown away — e.g. untick every 文字加工, press 換一版,
+   and 発光 was back. Choosing or saving a 我的樣式 starts it afresh (the look then holds the ticks). */
+Z.userTicks = Z.userTicks || {};
+Z.clearUserTicks = () => { for (const k of Object.keys(Z.userTicks)) delete Z.userTicks[k]; };
+const FALLBACK = { layout: 'center', enter: 'cut', exit: 'cut', hold: 'still', treat: 'none', bg: 'none', cam: 'push' };
+const keepUserTicks = (project, groups) => {
+  for (const [group, map] of Object.entries(Z.userTicks)) {
+    if (!groups.includes(group)) continue;
+    if (group === 'media') { const media = J.mediaEffectSettings(project, 'media'); media.enabled = Object.assign({}, media.enabled, map); project.media.effects = media; project.fx.zmlMediaPicked = true; continue; }
+    const en = (project.enabled[group] ||= {});
+    Object.assign(en, map);
+    const key = FALLBACK[group];   // the planner always needs one to fall back on (as 特效圖鑑 keeps it)
+    if (key && (group !== 'layout' || !Object.keys(en).some(k => en[k] !== false && J.LAYOUTS[k]))) en[key] = true;
+  }
 };
 
 Z.buildProject = ({ srtText, background, themeId, styleKey, aspect, seed, mood, typeOnly, blendIn, blendAmount, centerClear, fontPool, preset, echo, readable, shadow, scatter }) => {
@@ -47446,6 +47467,7 @@ Z.savePreset = (name) => {
   try { writePresets(list); } catch (e) { throw new Error('這個瀏覽器不讓網頁存資料，樣式存不起來'); }
   // what was just saved is what 換一版 and the next 生成 use — saving it and then not using it was a trap
   state.preset = preset.name;
+  Z.clearUserTicks();   // the look now holds them
   if (Z.last) Z.last.preset = preset;
   return preset;
 };
@@ -47477,7 +47499,7 @@ const buildPresets = () => {
     const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.value = value ?? '';
     const text = document.createElement('span'); text.textContent = label; b.append(text);
     if (removable) { const x = document.createElement('span'); x.className = 'x'; x.textContent = '×'; x.title = '刪除這個樣式'; x.addEventListener('click', e => { e.stopPropagation(); Z.deletePreset(value); buildPresets(); sync(); }); b.append(x); }
-    b.addEventListener('click', () => { state.preset = value; if (value) Z.fillFromPreset(value); sync(); });
+    b.addEventListener('click', () => { state.preset = value; if (value) { Z.fillFromPreset(value); Z.clearUserTicks(); } sync(); });
     return b;
   };
   box.replaceChildren(chip(null, '不用我的樣式'), ...list.map(p => chip(p.name, '★ ' + p.name, !Z.isBuiltinPreset(p.name))));
@@ -47870,17 +47892,20 @@ Z.forgetAutoEffects = (p, layers = ['lyrics', 'media']) => {
   if (layers.includes('lyrics')) for (const o of Object.values(p.lyricCutOptions || {})) if (o) delete o.autoEffects;
   for (const layer of layers.filter(l => l !== 'lyrics')) for (const o of Object.values(p[layer]?.cutOverrides || {})) if (o) delete o.autoEffects;
 };
-const changed = (tab) => { clearTimeout(pending); pending = setTimeout(() => {
-  if (project().fx?.zml && tab && !['style', 'font', 'lut'].includes(tab)) Z.forgetAutoEffects(project(), [tab === 'media' ? 'media' : 'lyrics']);
+const touched = new Set();   // every tab changed before the timer runs, not only the last one
+const changed = (tab) => { if (tab) touched.add(tab); clearTimeout(pending); pending = setTimeout(() => {
+  const tabs = [...touched].filter(t => !['style', 'font', 'lut'].includes(t)); touched.clear();
+  if (project().fx?.zml && tabs.length) Z.forgetAutoEffects(project(), [...new Set(tabs.map(t => t === 'media' ? 'media' : 'lyrics'))]);
   J.uiApi.syncUI(); J.uiApi.replan();
   // the background of a 簡易 MV is laid out by ZML: lay it out again with the new ticks
-  const p = project(); if (tab === 'media' && p.fx?.zml && p.media.items.length) { Z.scheduleMedia(p, J.ui.plan, p.seed); J.uiApi.replan(); }
+  const p = project(); if (tabs.includes('media') && p.fx?.zml && p.media.items.length) { Z.scheduleMedia(p, J.ui.plan, p.seed); J.uiApi.replan(); }
   J.uiApi.flushSave(); }, 200); };
 const setOn = (tab, key, on) => {
   const p = project();
   if (tab === 'style') { document.querySelector(`#zmlStyles button[data-value="${key}"]`)?.click(); return; }
   if (tab === 'lut') { Z.setLutTicked(key, on); Z.refreshLuts?.(); return; }
   if (tab === 'font') { const box = homeBox(key); if (box && box.checked !== on) { box.checked = on; box.dispatchEvent(new Event('change', { bubbles: true })); } return; }
+  (Z.userTicks[tab] ||= {})[key] = on;   // kept through 換一版 and the next 生成 (src/13a keepUserTicks)
   if (tab === 'media') { const next = J.mediaEffectSettings(p, 'media'); next.enabled[key] = on; p.media.effects = next; p.fx.zmlMediaPicked = true; }
   else { (p.enabled[tab] ||= {})[key] = on; p.mood = null; }
   changed(tab);
@@ -48899,6 +48924,36 @@ box.addEventListener('input', () => {
   clearTimeout(pending);
   pending = setTimeout(() => { J.uiApi.replan(); showNote(); if (Z.redrawPreview) Z.redrawPreview(); }, 400);
 });
+})();
+
+/* ============================================================
+   ZML — 柔光: every style ends the frame with a soft bloom (09_render post, st.glow × 質感). No effect tick in
+   特效圖鑑 reaches it, so a user who unticked everything still saw glowing text. This box on the 簡易 page
+   switches it off (project.fx.zmlNoGlow). On by default, so existing looks stay as they were.
+   ============================================================ */
+(() => {
+'use strict';
+const Z = (J.zml = J.zml || {});
+if (typeof document === 'undefined' || document.documentElement.lang !== 'zh-Hant') return;
+const $ = id => document.getElementById(id);
+
+const PREF = 'zml.glow.v1';
+let pref = (() => { try { return Object.assign({ on: true }, JSON.parse(localStorage.getItem(PREF) || '{}')); } catch (e) { return { on: true }; } })();
+const savePref = () => { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) {} };
+Z.glowPref = () => pref;
+
+if (!document.getElementById('zmlHome')) return;
+let pending = 0;
+function changed() {
+  const off = !pref.on, p = J.ui?.project;
+  if (p?.fx) p.fx.zmlNoGlow = off;
+  if (J.ui?.plan?.fx) J.ui.plan.fx.zmlNoGlow = off;
+  clearTimeout(pending); pending = setTimeout(() => { if (Z.redrawPreview) Z.redrawPreview(); }, 60);
+  sync();
+}
+function sync() { if ($('zmlGlowOn')) $('zmlGlowOn').checked = !!pref.on; }
+$('zmlGlowOn')?.addEventListener('change', e => { pref.on = e.target.checked; savePref(); changed(); });
+sync();
 })();
 
 </script>

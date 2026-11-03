@@ -1074,7 +1074,7 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
         <label id="zmlDropAudio" class="zml-drop"><input id="zmlFileAudio" type="file" accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg" hidden>
           <b>歌曲</b><small>mp3、wav、m4a</small><em></em></label>
         <label id="zmlDropSrt" class="zml-drop"><input id="zmlFileSrt" type="file" accept=".srt,.lrc,.txt" hidden>
-          <b>字幕</b><small>SRT 檔</small><em></em></label>
+          <b>字幕</b><small>SRT 檔（可不放：不放就只有特效、沒有歌詞，歌詞可另外上 YouTube 字幕）</small><em></em></label>
         <div class="zml-bg">
           <label id="zmlDropBg" class="zml-drop"><input id="zmlFileBg" type="file" accept="image/*,video/*" multiple hidden>
             <b>背景</b><small>圖片或影片，可以放很多個；或選右邊的純色</small><em></em></label>
@@ -46462,12 +46462,16 @@ Z.BAND_LAYOUTS = ['condensed', 'huge', 'knSlamStack', 'maskReveal', 'mixed', 'ty
 /* A layout 簡易模式 may use: measured to show the whole line, upright and large, for as long as it is sung. */
 Z.layoutAllowed = key => !Z.BANNED_LAYOUTS.includes(key) && (!Z.LAYOUT_CHECK || !!Z.LAYOUT_CHECK[key]?.ok);
 
+/* No subtitles (blank text) = an MV of the effects only: no lyric on screen, the lyrics go up as YouTube CC instead. */
 const readCues = (srtText) => {
+  if (!String(srtText || '').trim()) return [];
   const { cues, errors } = Z.parseSRT(srtText);
   if (!cues.length) throw new Error(errors.length ? `字幕第 ${errors[0].line} 行看不懂：${errors[0].message}` : '字幕檔沒有可用的歌詞');
   return cues;
 };
 const setCues = (project, cues) => {
+  if (!cues.length) { project.lyrics = ''; project.overrides = {}; project.lyricCutOptions = {}; project.timing = Object.assign({}, project.timing, { lineTimes: {}, cutTimes: {} }); project.zmlNoLyrics = true; return; }
+  project.zmlNoLyrics = false;
   const converted = Z.cuesToProject(cues);
   project.lyrics = converted.lyrics; project.overrides = converted.overrides; project.lyricCutOptions = converted.lyricCutOptions;
   project.timing = Object.assign({}, project.timing, { lineTimes: converted.lineTimes, cutTimes: {} });
@@ -46668,8 +46672,8 @@ Z.generate = async (options) => {
   S.audio.zmlKicks = Z.findHits(S.audio.buffer, { near: 20, over: 0, rise: 0.01, floor: 0.02 });   // every kick, for 斜色塊
   // Subtitles never make the video longer than the song.
   const length = S.audio.duration, kept = cues.filter(cue => cue.start < length - 0.1).map(cue => Object.assign({}, cue, { end: Math.min(cue.end, length) }));
-  if (!kept.length) throw new Error('字幕檔沒有可用的歌詞');
-  if (kept.length !== cues.length || kept[kept.length - 1].end !== cues[kept.length - 1].end) { setCues(S.project, kept); setFonts(S.project); setBlendIn(S.project, S.project.fx.zmlBlendIn); setBands(S.project, S.project.zmlCenterClear); }
+  if (cues.length && !kept.length) throw new Error('字幕檔沒有可用的歌詞');
+  if (kept.length && (kept.length !== cues.length || kept[kept.length - 1].end !== cues[kept.length - 1].end)) { setCues(S.project, kept); setFonts(S.project); setBlendIn(S.project, S.project.fx.zmlBlendIn); setBands(S.project, S.project.zmlCenterClear); }
   const files = options.background === 'image' ? (options.mediaFiles || (options.imageFile ? [options.imageFile] : [])) : [];
   if (files.length) await ui.addMediaFiles(files, 'media');
   Z.last = { themeId: options.themeId, styleKey: options.styleKey, background: options.background, mood: options.mood, typeOnly: options.typeOnly, blendIn: options.blendIn, blendAmount: options.blendAmount, centerClear: options.centerClear, echo: options.echo, readable: options.readable, scatter: options.scatter, shadow: options.shadow, fontPool: options.fontPool || null, preset: options.preset || null };
@@ -47359,7 +47363,9 @@ Z.scheduleMedia = (project, plan, seed = 0) => {
   if (!items.length) return;
   const starts = plan.cuts.filter(c => Number.isInteger(c.part) && c.line >= 0).map(c => c.start).sort((a, b) => a - b);
   const turns = new Set(Z.gaps(plan).flatMap(g => [g[0], g[1]]).filter(t => t > 0.5 && t < plan.duration - 1));
-  const marks = [...new Set([...starts, ...turns])].sort((a, b) => a - b);
+  // no lyrics (an effects-only MV): the strong drum hits stand in for the line starts
+  const hits = !starts.length && plan.zmlHits ? plan.zmlHits.t.filter((t, i) => plan.zmlHits.s[i] >= 0.6) : [];
+  const marks = [...new Set([...starts, ...hits, ...turns])].sort((a, b) => a - b);
   const rnd = J.rng(seed + 4211), overrides = {}, lineTimes = {};
   // Ticks the user set by hand in 圖片影片 (特效圖鑑 or the editor) are used exactly. Otherwise ZML's own slow moves
   // and windows — the editor's おまかせ ticks techniques at random, and those must not count as a choice.
@@ -47506,7 +47512,7 @@ const buildPresets = () => {
 };
 
 /* ---------------- inputs ---------------- */
-const missing = () => [!state.audio && '歌曲', !state.srt && '字幕', !state.background && '背景'].filter(Boolean);
+const missing = () => [!state.audio && '歌曲', !state.background && '背景'].filter(Boolean);   // 字幕 is optional: without it the MV has the effects only
 function sync() {
   for (const [drop, file] of [['zmlDropAudio', state.audio], ['zmlDropSrt', state.srt], ['zmlDropBg', state.media[0]]]) {
     $(drop).classList.toggle('filled', !!file); $(drop).querySelector('em').textContent = !file ? '' : drop === 'zmlDropBg' && state.media.length > 1 ? `✓ ${state.media.length} 個檔案，會輪流出現` : '✓ ' + file.name;

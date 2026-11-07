@@ -46532,9 +46532,11 @@ const setMood = (project, mood) => {
 /* What 我的樣式 remembers of a project: which techniques are switched on, the style, the amounts — everything the
    editor's 手法 / 風格 / 效果 tabs set. Not the song, its timing, the frame shape or the seed. */
 Z.PRESET_KEYS = ['themes', 'themeBalance', 'style', 'mood', 'extra', 'wa', 'horror', 'typo', 'kinetic', 'fx', 'enabled', 'colorTheme'];
+// what belongs to one song, not to a look: a look saved while making song A must not carry A's 前奏引言 onto song B (2026-11-07 Borrowed Eyes got When You Die's hook)
+Z.SONG_FX_KEYS = ['zmlHook', 'zmlBandOn', 'zmlBand', 'zmlTitle'];
 Z.presetOf = (project, name) => ({
   name: String(name || '').trim() || '我的樣式', saved: new Date().toISOString().slice(0, 10),
-  settings: JSON.parse(JSON.stringify(Object.fromEntries(Z.PRESET_KEYS.filter(key => project[key] !== undefined).map(key => [key, project[key]])))),
+  settings: (() => { const st = JSON.parse(JSON.stringify(Object.fromEntries(Z.PRESET_KEYS.filter(key => project[key] !== undefined).map(key => [key, project[key]])))); if (st.fx) for (const key of Z.SONG_FX_KEYS) delete st.fx[key]; return st; })(),
   zml: { mediaEnabled: project.fx?.zmlMediaPicked ? J.mediaEffectSettings(project, 'media').enabled : null, mood: project.fx?.zmlMood ?? 0.5, typeOnly: !!project.zmlTypeOnly, blendIn: !!project.fx?.zmlBlendIn, blendAmount: project.fx?.zmlBlendAmount ?? 80, centerClear: !!project.zmlCenterClear, echo: !!project.fx?.zmlEcho, scatter: !!project.fx?.zmlScatter, readable: !!project.fx?.zmlReadable, shadow: project.fx?.zmlShadowAmount ?? 60, fontPool: project.fx?.zmlFontPool || null },
 });
 const applyLook = (project, options) => {
@@ -46557,7 +46559,9 @@ const applyLook = (project, options) => {
   if (preset) {
     // the saved look as it is: the same techniques every time, only the seed (which of them each line gets) changes
     const saved = JSON.parse(JSON.stringify(preset.settings));
+    const songFx = Object.fromEntries(Z.SONG_FX_KEYS.map(key => [key, project.fx?.[key]]));   // looks saved before the fix still hold an old song's hook
     for (const key of Z.PRESET_KEYS) if (saved[key] !== undefined) project[key] = saved[key];
+    if (project.fx) for (const key of Z.SONG_FX_KEYS) { if (songFx[key] === undefined) delete project.fx[key]; else project.fx[key] = songFx[key]; }
     if (!J.STYLES[project.style]) project.style = J.STYLE_ORDER[0];
     // techniques added since it was saved stay off; ones that no longer exist are dropped
     const fresh = J.defaultProject().enabled;

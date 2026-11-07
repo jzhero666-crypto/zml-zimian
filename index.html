@@ -1086,7 +1086,7 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
       </div>
       <div id="zmlOrder" class="zml-order" hidden><b>背景順序</b><small>放進來時照檔名的數字排（01、02…10，2 會排在 10 前面）。想換位置就按縮圖下面的 ◀ ▶。圖片每張停 7–15 秒、影片整支播完就換下一個，全部輪完再從第 1 個開始。</small><ol id="zmlOrderList"></ol></div>
       <label class="zml-hook"><b>前奏引言</b><small>選填。一行一句，最多兩句，用來在歌唱之前告訴觀眾這首歌在寫什麼（寫具體的事，別寫「一段很痛的愛情」）。前奏夠長：先放引言再放歌名；前奏短：放得下幾句放幾句，其餘移到第一段間奏；整首都沒空檔就不放。引言永遠不會跟歌詞同時出現。每首歌各自記住。</small>
-        <textarea id="zmlHook" rows="2" maxlength="80" placeholder="她把你的備註，改回了全名"></textarea></label>
+        <textarea id="zmlHook" rows="2" maxlength="240" placeholder="她把你的備註，改回了全名"></textarea></label>
     </section>
 
     <section class="zml-step">
@@ -1151,7 +1151,7 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
   <main id="zmlResult" class="zml-main" hidden>
     <div id="zmlPreview" class="zml-preview"><canvas></canvas><audio controls></audio><p id="zmlNowInfo" class="zml-nowinfo" aria-live="off"></p></div>
     <p id="zmlHookWhere" class="zml-note zml-hookwhere" hidden></p>
-    <label class="zml-hook zml-hook-live"><b>前奏引言</b><small>在這裡改，預覽會跟著變</small><textarea id="zmlHookLive" rows="2" maxlength="80"></textarea></label>
+    <label class="zml-hook zml-hook-live"><b>前奏引言</b><small>在這裡改，預覽會跟著變</small><textarea id="zmlHookLive" rows="2" maxlength="240"></textarea></label>
     <div class="zml-row zml-actions">
       <button id="zmlBack" type="button" class="zml-ghost">← 重新選</button>
       <button id="zmlReroll" type="button">換一版</button>
@@ -48792,6 +48792,20 @@ const holdFor = text => J.clamp(2.4 + 0.17 * [...text].length, 3, 6);
 /* the characters come in one after another, quicker for a long line */
 const stepFor = text => Math.min(0.11, 1.6 / Math.max(1, [...text].length)), CHAR_IN = 0.2;
 const LEAST = 2.8;   // shorter than this cannot be read
+/* one line -> the rows it is drawn in: as it is when it fits, else two rows of about equal width,
+   broken at a space (English) or between characters (Chinese/Japanese), after a comma or full stop when one is near the middle */
+Z.hookRows = (text, measure, max) => {
+  if (measure(text) <= max) return [text];
+  const latin = /\s/.test(text.trim()), parts = latin ? text.trim().split(/\s+/) : [...text], sep = latin ? ' ' : '';
+  let best = null;
+  for (let k = 1; k < parts.length; k++) {
+    const a = parts.slice(0, k).join(sep), b = parts.slice(k).join(sep), wide = Math.max(measure(a), measure(b));
+    // a break after a full stop (or a comma) reads best, as long as both rows still fit the frame
+    const fits = wide <= max, score = wide * (fits && /[.;!?。；！？]$/.test(a) ? 0.55 : fits && /[,:，：、]$/.test(a) ? 0.75 : 1);
+    if (!best || score < best.score) best = { score, rows: [a, b] };
+  }
+  return best ? best.rows : [text];
+};
 /* the text box -> clean lines */
 Z.hookLines = (text) => String(text || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean).slice(0, MAX_LINES);
 
@@ -48864,18 +48878,24 @@ function drawHook(ctx, plan, t) {
   const media = !!(plan.media?.cuts || []).length, face = plan.zmlHook.face;
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
   let size = unit * 0.05; ctx.font = J.fontCSS(face, size);
-  const width = ctx.measureText(on.text).width, fit = w * 0.82 / Math.max(1, width);
+  // a line too wide for the frame breaks into two rows (English sentences, 2026-11-07) before it is made smaller
+  const rows = Z.hookRows(on.text, s => ctx.measureText(s).width, w * 0.82);
+  const widest = Math.max(...rows.map(r => ctx.measureText(r).width)), fit = w * 0.82 / Math.max(1, widest);
   if (fit < 1) { size *= fit; ctx.font = J.fontCSS(face, size); }
   ctx.fillStyle = media ? '#FFFFFF' : sc.fg; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
   ctx.shadowColor = media ? 'rgba(0,0,0,.6)' : 'rgba(0,0,0,.42)'; ctx.shadowBlur = unit * (media ? 0.02 : 0.014);
   // the whole line is measured once, so it is centred where it will end up; each character fades in on its turn
-  const chars = [...on.text], step = stepFor(on.text), left = w / 2 - ctx.measureText(on.text).width / 2;
-  let prefix = '';
-  for (let i = 0; i < chars.length; i++) {
-    const a = J.clamp((on.since - i * step) / CHAR_IN) * on.out;
-    if (a > 0) { ctx.globalAlpha = a * 0.95; ctx.fillText(chars[i], left + ctx.measureText(prefix).width, h / 2); }
-    prefix += chars[i];
-  }
+  const step = stepFor(on.text), gap = size * 1.45;
+  let n = 0;
+  rows.forEach((row, r) => {
+    const chars = [...row], left = w / 2 - ctx.measureText(row).width / 2, y = h / 2 + (r - (rows.length - 1) / 2) * gap;
+    let prefix = '';
+    for (let i = 0; i < chars.length; i++, n++) {
+      const a = J.clamp((on.since - n * step) / CHAR_IN) * on.out;
+      if (a > 0) { ctx.globalAlpha = a * 0.95; ctx.fillText(chars[i], left + ctx.measureText(prefix).width, y); }
+      prefix += chars[i];
+    }
+  });
   ctx.restore();
 }
 let depth = 0;

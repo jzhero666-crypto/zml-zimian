@@ -1087,6 +1087,8 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
       <div id="zmlOrder" class="zml-order" hidden><b>背景順序</b><small>放進來時照檔名的數字排（01、02…10，2 會排在 10 前面）。想換位置就按縮圖下面的 ◀ ▶。圖片每張停 7–15 秒、影片整支播完就換下一個，全部輪完再從第 1 個開始。</small><ol id="zmlOrderList"></ol></div>
       <label class="zml-hook"><b>前奏引言</b><small>選填。一行一句，最多兩句，用來在歌唱之前告訴觀眾這首歌在寫什麼（寫具體的事，別寫「一段很痛的愛情」）。前奏夠長：先放引言再放歌名；前奏短：放得下幾句放幾句，其餘移到第一段間奏；整首都沒空檔就不放。引言永遠不會跟歌詞同時出現。每首歌各自記住。</small>
         <textarea id="zmlHook" rows="2" maxlength="240" placeholder="她把你的備註，改回了全名"></textarea></label>
+      <label class="zml-mood zml-sub"><b>引言時間</b><input id="zmlHookPct" type="range" min="15" max="70" step="5" value="40" aria-label="引言佔前奏的時間"><b id="zmlHookPctValue">40%</b><small>引言（逐字出現到淡掉）佔前奏多少時間；引言結束 1 秒後出歌名</small></label>
+      <label class="zml-mood zml-sub"><b>歌名時間</b><input id="zmlTitlePct" type="range" min="15" max="60" step="5" value="35" aria-label="歌名佔前奏的時間"><b id="zmlTitlePctValue">35%</b><small>歌名停留佔前奏多少時間，第一句歌詞前 2 秒收掉。前奏太短時兩個會一起等比例縮短</small></label>
     </section>
 
     <section class="zml-step">
@@ -1122,8 +1124,11 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
       <label class="zml-check"><input id="zmlSlashOn" type="checkbox"><span>斜色塊</span><small>背景變黑白，每一下大鼓都有一條彩色斜條，從上下左右斜的不同角度劃過畫面再消失（要放圖片或影片才有效）</small></label>
       <label id="zmlSlashRow" class="zml-mood zml-sub" hidden><span>少</span><input id="zmlSlashAmount" type="range" min="0" max="100" step="5" value="50" aria-label="斜色塊的多寡"><span>多</span><b id="zmlSlashValue">50%</b><small>往左：只跟重的鼓；中間以上：每一下鼓都有；再往右：常常兩條一起來</small></label>
       <label class="zml-check"><input id="zmlDustOn" type="checkbox"><span>漂浮粒子</span><small>畫面上有細細的白色塵點慢慢飄、忽明忽暗，像舞台燈光裡的灰塵；只在背景上，不蓋歌詞，黑底也有效</small></label>
+      <label id="zmlDustRow" class="zml-mood zml-sub" hidden><span>弱</span><input id="zmlDustAmount" type="range" min="5" max="100" step="5" aria-label="漂浮粒子的強弱"><span>強</span><b id="zmlDustValue"></b><small>往左：少少幾顆、淡淡的；往右：多又亮；改了預覽馬上跟著變</small></label>
       <label class="zml-check"><input id="zmlGlitchOn" type="checkbox"><span>故障</span><small>偶爾在重的鼓點上閃 2～4 格故障：畫面橫向切片錯開、紅青色分離，馬上恢復；只動背景，歌詞不受影響</small></label>
+      <label id="zmlGlitchRow" class="zml-mood zml-sub" hidden><span>弱</span><input id="zmlGlitchAmount" type="range" min="5" max="100" step="5" aria-label="故障的強弱"><span>強</span><b id="zmlGlitchValue"></b><small>往左：很少出現、錯位很小；往右：常出現、切得比較開；改了預覽馬上跟著變</small></label>
       <label class="zml-check"><input id="zmlFlickerOn" type="checkbox"><span>光影閃爍</span><small>重拍時整個畫面像過曝一樣亮起來，半秒內慢慢退回；平常光線也會微微晃動。只動背景，歌詞照樣清楚；改了預覽會馬上跟著變</small></label>
+      <label id="zmlFlickerRow" class="zml-mood zml-sub" hidden><span>弱</span><input id="zmlFlickerAmount" type="range" min="5" max="100" step="5" aria-label="光影閃爍的強弱"><span>強</span><b id="zmlFlickerValue"></b><small>往左：只在最重的鼓輕輕亮一下；往右：每個重拍都爆白；改了預覽馬上跟著變</small></label>
       <label class="zml-check"><input id="zmlBandOn" type="checkbox"><span>橫框換圖</span><small>圖片放在畫面中間一條橫框裡，每句歌詞開頭和重拍都換一次：換下一張圖，或同一張換成半身、特寫、上下兩格；換法有直接切、推移、放大切入、故障、3D 翻轉、3D 翻牌。歌詞排在框的上下。只用圖片，影片不會放進框裡</small></label>
       <label id="zmlBandRow" class="zml-mood zml-sub" hidden><span>慢</span><input id="zmlBandPace" type="range" min="0" max="100" step="5" value="50" aria-label="橫框換圖的快慢"><span>快</span><b id="zmlBandValue">50%</b><small>往左：大多只在換句時換；往右：重拍也常換。改了要按「換一版」或重新生成才會套用<span id="zmlBandNote" hidden>（已生成的影片，按「換一版」就會套用）</span></small></label>
       <details id="zmlLutBox" class="zml-fonts zml-lut"><summary>濾鏡<small id="zmlLutNote"></small></summary>
@@ -46537,7 +46542,7 @@ const setMood = (project, mood) => {
    editor's 手法 / 風格 / 效果 tabs set. Not the song, its timing, the frame shape or the seed. */
 Z.PRESET_KEYS = ['themes', 'themeBalance', 'style', 'mood', 'extra', 'wa', 'horror', 'typo', 'kinetic', 'fx', 'enabled', 'colorTheme'];
 // what belongs to one song, not to a look: a look saved while making song A must not carry A's 前奏引言 onto song B (2026-11-07 Borrowed Eyes got When You Die's hook)
-Z.SONG_FX_KEYS = ['zmlHook', 'zmlBandOn', 'zmlBand', 'zmlTitle'];
+Z.SONG_FX_KEYS = ['zmlHook', 'zmlBandOn', 'zmlBand', 'zmlTitle', 'zmlHookPct', 'zmlTitlePct'];
 Z.presetOf = (project, name) => ({
   name: String(name || '').trim() || '我的樣式', saved: new Date().toISOString().slice(0, 10),
   settings: (() => { const st = JSON.parse(JSON.stringify(Object.fromEntries(Z.PRESET_KEYS.filter(key => project[key] !== undefined).map(key => [key, project[key]])))); if (st.fx) for (const key of Z.SONG_FX_KEYS) delete st.fx[key]; return st; })(),
@@ -48794,8 +48799,12 @@ const $ = id => document.getElementById(id);
 const MAX_LINES = 2, FADE = 0.9, EDGE = 0.4, BEFORE_LYRIC = 0.5, BEFORE_CARD = 0.3, CARD = [2], LONGEST = 8;   // the hook gets the intro; the name keeps its last 2 s (user, 2026-10-24: 引言長一點)
 /* how long a line stays: long enough to read it twice */
 const holdFor = text => J.clamp(2.4 + 0.17 * [...text].length, 3, 6);
-/* the characters come in one after another, quicker for a long line */
-const stepFor = text => Math.min(0.11, 1.6 / Math.max(1, [...text].length)), CHAR_IN = 0.2;
+/* the characters come in one after another over about half the time the line is on screen (user 2026-11-08: 放慢) */
+const CHAR_IN = 0.35;
+const stepFor = (text, dur = 4) => J.clamp((dur * 0.5 - CHAR_IN) / Math.max(1, [...text].length), 0.05, 0.4);
+/* user 2026-11-08: the hook takes a share of the intro (時間 %), the name comes 1 s after it, and leaves 2 s before the first lyric */
+const GAP = 1, TAIL = 2, CARD_LEAST = 1.5;
+Z.HOOK_PCT = 40; Z.TITLE_PCT = 35;
 const LEAST = 2.8;   // shorter than this cannot be read
 /* one line -> the rows it is drawn in: as it is when it fits, else two rows of about equal width,
    broken at a space (English) or between characters (Chinese/Japanese), after a comma or full stop when one is near the middle */
@@ -48821,7 +48830,25 @@ Z.placeHook = (plan, lines) => {
   const lyric = plan.cuts.filter(c => Number.isInteger(c.part) && c.line >= 0).sort((a, b) => a.start - b.start);
   const first = lyric.length ? lyric[0].start : plan.duration;
   const card = plan.cuts.find(c => c.layout === 'title');
-  // the title card takes the last 3 s (or 2 s) before the first lyric when the lines then still fit in front of it
+  // intro: [empty] → hook (H% of the intro) → 1 s → name (T% of the intro) → 2 s → first lyric; both shrink together on a short intro
+  const H = J.clamp((plan.fx?.zmlHookPct ?? Z.HOOK_PCT) / 100, 0.05, 0.9), T = J.clamp((plan.fx?.zmlTitlePct ?? Z.TITLE_PCT) / 100, 0.05, 0.9);
+  {
+    let hookDur = H * first, cardDur = card ? T * first : 0;
+    const fixed = EDGE + GAP * (card ? 1 : 0) + TAIL, spare = first - fixed;
+    if (hookDur + cardDur > spare) { const f = Math.max(0, spare) / (hookDur + cardDur); hookDur *= f; cardDur *= f; }
+    if (hookDur >= LEAST && (!card || cardDur >= CARD_LEAST)) {
+      const cardEnd = first - TAIL, cardStart = cardEnd - cardDur, hookEnd = card ? cardStart - GAP : first - TAIL;
+      // two lines share the hook time when each still gets enough; else the second goes to an interlude
+      const n = lines.length > 1 && hookDur >= 2 * LEAST ? lines.length : 1;
+      const w = lines.slice(0, n).map(holdFor), sum = w.reduce((a, b) => a + b, 0);
+      let at = hookEnd - hookDur;
+      for (let k = 0; k < n; k++) { const d = hookDur * w[k] / sum; out.shows.push({ text: lines[k], start: at, end: at + d }); at += d; }
+      if (card) { card.start = cardStart; card.end = cardEnd; card.enter = 'blur'; card.exit = 'blur'; }
+      out.where = n === lines.length ? 'intro' : 'short';
+      return placeRest(out, lines, n, lyric, lines.map(holdFor));
+    }
+  }
+  // intro too short for the shares: the older way — the name keeps its last 2 s, the lines fill what is left
   let cardStart = null;
   if (card) for (const len of CARD) { const at = first - len; if (at - BEFORE_CARD - EDGE >= LEAST) { cardStart = at; break; } }
   const room = card ? (cardStart == null ? 0 : cardStart - BEFORE_CARD - EDGE) : first - BEFORE_LYRIC - EDGE;
@@ -48835,8 +48862,11 @@ Z.placeHook = (plan, lines) => {
     if (card) { card.start = cardStart; card.enter = 'blur'; card.exit = 'blur'; }   // comes in softly, fades into the first lyric
     out.where = i === lines.length ? 'intro' : 'short';
   }
+  return placeRest(out, lines, i, lyric, needs);
+};
+/* the lines not placed in the intro: the first stretch without lyrics inside the song that is long enough */
+function placeRest(out, lines, i, lyric, needs) {
   if (i < lines.length) {
-    // the rest: the first stretch without lyrics inside the song that is long enough
     const gaps = []; let end = 0;
     for (const c of lyric) { if (c.start - end > 0) gaps.push([end, c.start]); end = Math.max(end, c.end); }
     for (const [a, b] of gaps) {
@@ -48849,7 +48879,7 @@ Z.placeHook = (plan, lines) => {
   out.left = lines.slice(i);
   if (!out.shows.length) out.where = 'none';
   return out;
-};
+}
 
 /* the face: from the lyric pool, one that can draw every character of the lines */
 const pickFace = (project, plan, text) => {
@@ -48874,7 +48904,7 @@ Z.hookAt = (plan, t) => {
   const h = plan?.zmlHook; if (!h?.shows?.length) return null;
   const s = h.shows.find(s => t >= s.start && t < s.end); if (!s) return null;
   const alpha = J.clamp(Math.min((t - s.start) / CHAR_IN, (s.end - t) / FADE));
-  return alpha > 0 ? { text: s.text, alpha, since: t - s.start, out: J.clamp((s.end - t) / FADE) } : null;
+  return alpha > 0 ? { text: s.text, alpha, since: t - s.start, dur: s.end - s.start, out: J.clamp((s.end - t) / FADE) } : null;
 };
 
 function drawHook(ctx, plan, t) {
@@ -48890,7 +48920,7 @@ function drawHook(ctx, plan, t) {
   ctx.fillStyle = media ? '#FFFFFF' : sc.fg; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
   ctx.shadowColor = media ? 'rgba(0,0,0,.6)' : 'rgba(0,0,0,.42)'; ctx.shadowBlur = unit * (media ? 0.02 : 0.014);
   // the whole line is measured once, so it is centred where it will end up; each character fades in on its turn
-  const step = stepFor(on.text), gap = size * 1.45;
+  const step = stepFor(on.text, on.dur), gap = size * 1.45;
   let n = 0;
   rows.forEach((row, r) => {
     const chars = [...row], left = w / 2 - ctx.measureText(row).width / 2, y = h / 2 + (r - (rows.length - 1) / 2) * gap;
@@ -48922,13 +48952,18 @@ const recall = (file) => { if (!file || !/^audio[/]|[.](mp3|wav|m4a|flac|ogg)$/i
 $('zmlFileAudio')?.addEventListener('change', e => recall(e.target.files[0]), true);
 home.addEventListener('drop', e => { for (const f of e.dataTransfer?.files || []) recall(f); }, true);
 
+/* the two time shares (sliders under the box), kept across reloads */
+const PCT = 'zml.hookpct.v1';
+const pct = (() => { try { return Object.assign({ hook: Z.HOOK_PCT, title: Z.TITLE_PCT }, JSON.parse(localStorage.getItem(PCT) || '{}')); } catch (e) { return { hook: Z.HOOK_PCT, title: Z.TITLE_PCT }; } })();
+const syncPct = () => { for (const [k, id] of [['hook', 'zmlHookPct'], ['title', 'zmlTitlePct']]) { if ($(id)) $(id).value = pct[k]; if ($(id + 'Value')) $(id + 'Value').textContent = pct[k] + '%'; } };
 const mmss = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
 Z.hookNote = (plan) => {
   const h = plan?.zmlHook; if (!h || !h.where) return '';
   if (h.where === 'none') return '這首歌從頭到尾沒有夠長的空檔，引言放不下，所以沒有放（不會疊在歌詞上）。可以把引言寫進 Shorts 或影片說明。';
   const later = h.shows.filter(s => s.start >= 1), where = later.length ? mmss(later[0].start) + ' 的間奏' : '';
   const card = plan.cuts.find(c => c.layout === 'title');
-  const name = card && h.where !== 'interlude' ? '歌名在第一句前 ' + Math.round(card.end - card.start) + ' 秒出現。' : '';
+  const firstLyric = plan.cuts.filter(c => Number.isInteger(c.part) && c.line >= 0).reduce((m, c) => Math.min(m, c.start), 1e9);
+  const name = card && h.where !== 'interlude' ? '歌名 ' + mmss(card.start) + '–' + mmss(card.end) + '，第一句前 ' + Math.max(0, Math.round(firstLyric - card.end)) + ' 秒收掉。' : '';
   let note = h.where === 'intro' ? '引言放在前奏，' + name
     : h.where === 'short' ? '前奏比較短：第一句放前奏，第二句移到 ' + where + '；' + name
     : '前奏太短放不下：引言移到 ' + where + '出現。';
@@ -48941,7 +48976,7 @@ const showNote = () => { const p = $('zmlHookWhere'); if (!p) return; const note
 const build = Z.buildProject;
 Z.buildProject = function (options, ...rest) {
   const project = build.call(this, options, ...rest);
-  if (project?.fx) project.fx.zmlHook = box.value;
+  if (project?.fx) Object.assign(project.fx, { zmlHook: box.value, zmlHookPct: pct.hook, zmlTitlePct: pct.title });
   return project;
 };
 const generate = Z.generate;
@@ -48959,6 +48994,14 @@ if (live) {
   box.addEventListener('input', () => { if (live.value !== box.value) live.value = box.value; });
   new MutationObserver(() => { if (!$('zmlResult').hidden) live.value = box.value; }).observe($('zmlResult'), { attributes: true, attributeFilter: ['hidden'] });
 }
+syncPct();
+for (const [k, id] of [['hook', 'zmlHookPct'], ['title', 'zmlTitlePct']]) $(id)?.addEventListener('input', e => {
+  pct[k] = +e.target.value; try { localStorage.setItem(PCT, JSON.stringify(pct)); } catch (err) {}
+  syncPct();
+  const p = J.ui?.project; if (!p?.fx?.zml) return;
+  Object.assign(p.fx, { zmlHookPct: pct.hook, zmlTitlePct: pct.title });
+  clearTimeout(pending); pending = setTimeout(() => { J.uiApi.replan(); showNote(); if (Z.redrawPreview) Z.redrawPreview(); }, 300);
+});
 box.addEventListener('input', () => {
   if (song) remember(song, box.value);
   const p = J.ui?.project; if (!p?.fx?.zml) return;
@@ -49016,12 +49059,15 @@ const $ = id => document.getElementById(id);
 
 /* ---------------- what the page has chosen ---------------- */
 const PREF = 'zml.atmos.v1';
-const DEF = { dust: false, glitch: false, flicker: false };
+// strengths 5–100 (user 2026-11-08: 太閃、眼睛不舒服 → softer defaults + sliders)
+const DEF = { dust: false, glitch: false, flicker: false, dustAmt: 45, glitchAmt: 40, flickerAmt: 30 };
 let pref = (() => { try { return Object.assign({}, DEF, JSON.parse(localStorage.getItem(PREF) || '{}')); } catch (e) { return Object.assign({}, DEF); } })();
 const savePref = () => { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) {} };
 Z.atmosPref = () => pref;
 /* what a project carries (null = all off); the seed moves the specks and glitch hits with 換一版 */
-Z.atmosFx = (seed = 0) => (pref.dust || pref.glitch || pref.flicker) ? { dust: !!pref.dust, glitch: !!pref.glitch, flicker: !!pref.flicker, seed } : null;
+Z.atmosFx = (seed = 0) => (pref.dust || pref.glitch || pref.flicker) ? { dust: !!pref.dust, glitch: !!pref.glitch, flicker: !!pref.flicker, dustAmt: pref.dustAmt, glitchAmt: pref.glitchAmt, flickerAmt: pref.flickerAmt, seed } : null;
+/* 0..1 strength of one effect; projects made before the sliders count as full strength */
+const amt = (A, k) => J.clamp((A[k + 'Amt'] ?? 100) / 100);
 
 /* ---------------- when things happen ---------------- */
 const cache = new WeakMap();
@@ -49038,19 +49084,20 @@ function hitList(plan) {
 }
 function events(plan, A) {
   const c = cache.get(plan); if (c && c.A === A) return c.out;
-  const hits = hitList(plan), rnd = J.rng((A.seed || 0) + 4471);
-  // 光影閃爍: the strong hits, at least 1.1 s apart — in the reference about one big blow-out every 2–4 s
+  const hits = hitList(plan), rnd = J.rng((A.seed || 0) + 4471), fk = amt(A, 'flicker'), gk = amt(A, 'glitch'), dk = amt(A, 'dust');
+  // 光影閃爍: the strong hits; weaker = only the heaviest hits, further apart, and dimmer
   const flashes = []; let last = -1e9;
-  for (const [t, s] of hits) if (s >= 0.55 && t - last >= 1.1) { flashes.push({ t, a: 0.35 + 0.55 * J.clamp((s - 0.55) / 0.45) * (0.7 + 0.3 * rnd()) }); last = t; }
-  // 故障: rarer — a strong hit, at least 2.4 s after the last one, and only some of them
+  const fFloor = 0.55 + 0.3 * (1 - fk), fGap = 1.1 + 1.6 * (1 - fk);
+  for (const [t, s] of hits) if (s >= fFloor && t - last >= fGap) { flashes.push({ t, a: fk * (0.35 + 0.55 * J.clamp((s - 0.55) / 0.45)) * (0.7 + 0.3 * rnd()) }); last = t; }
+  // 故障: rarer — a strong hit, some seconds after the last one, and only some of them
   const glitches = []; last = -1e9;
-  for (const [t, s] of hits) if (s >= 0.65 && t - last >= 2.4 && rnd() < 0.55) { glitches.push({ t, frames: 2 + (rnd() * 3 | 0), seed: rnd() * 1e6 | 0 }); last = t; }
-  // 漂浮粒子: fixed specks; place, drift, size and twinkle from the seed
+  for (const [t, s] of hits) if (s >= 0.65 && t - last >= 2.4 + 3 * (1 - gk) && rnd() < 0.2 + 0.5 * gk) { glitches.push({ t, frames: 2 + (rnd() * (1 + 2 * gk) | 0), seed: rnd() * 1e6 | 0 }); last = t; }
+  // 漂浮粒子: fixed specks; place, drift, size and twinkle from the seed; how many and how bright from the slider
   const specks = [];
-  for (let i = 0; i < 90; i++) {
+  for (let i = 0, n = Math.round(25 + 115 * dk); i < n; i++) {
     const big = rnd() < 0.12;
     specks.push({ x: rnd(), y: rnd(), vx: (rnd() - 0.5) * 0.010, vy: -(0.003 + rnd() * 0.012), wob: rnd() * 6.28, wf: 0.2 + rnd() * 0.5,
-      r: big ? 1.6 + rnd() * 1.6 : 0.6 + rnd() * 1.1, big, ph: rnd() * 6.28, tf: 0.6 + rnd() * 2.2, base: 0.25 + rnd() * 0.55 });
+      r: big ? 1.6 + rnd() * 1.6 : 0.6 + rnd() * 1.1, big, ph: rnd() * 6.28, tf: 0.6 + rnd() * 2.2, base: (0.25 + rnd() * 0.55) * (0.45 + 0.6 * dk) });
   }
   const out = { flashes, glitches, specks };
   cache.set(plan, { A, out });
@@ -49064,7 +49111,7 @@ const noise = x => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f)
 Z.atmosFlashAt = (plan, t) => {   // 0..~1, for tests and look-see tools
   const A = plan?.fx?.zmlAtmos; if (!A?.flicker) return 0;
   const ev = events(plan, A), i = lastBefore(ev.flashes, t); if (i < 0) return 0;
-  const age = t - ev.flashes[i].t; return age > 1.2 ? 0 : ev.flashes[i].a * Math.exp(-age / 0.16);
+  const age = t - ev.flashes[i].t; return age > 1.2 ? 0 : ev.flashes[i].a * Math.exp(-age / 0.16) * J.clamp(age / 0.05 + 0.15);   // ~3 frames up, not one hard frame
 };
 Z.atmosGlitchAt = (plan, t) => {
   const A = plan?.fx?.zmlAtmos; if (!A?.glitch) return null;
@@ -49094,7 +49141,7 @@ function drawDust(ctx, ev, t, w, h, k) {
 function drawFlicker(ctx, plan, A, t, w, h) {
   const flash = Z.atmosFlashAt(plan, t);
   // the light in between: a slow wobble plus a faster shiver, a few percent either way
-  const amb = (noise(t * 3.1 + (A.seed % 97)) - 0.5) * 0.08 + (noise(t * 13.7 + 50) - 0.5) * 0.04;
+  const amb = ((noise(t * 3.1 + (A.seed % 97)) - 0.5) * 0.08 + (noise(t * 13.7 + 50) - 0.5) * 0.03) * amt(A, 'flicker');
   if (amb < 0) { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = -amb; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h); }
   else if (amb > 0) { ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = amb; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); }
   if (flash > 0.01) {
@@ -49109,7 +49156,7 @@ function drawGlitch(ctx, plan, t, w, h) {
   const hit = Z.atmosGlitchAt(plan, t); if (!hit) return;
   const rnd = J.rng(hit.g.seed + hit.f * 31), s = fit(scratch, w, h);
   s.globalCompositeOperation = 'copy'; s.globalAlpha = 1; s.filter = 'none'; s.drawImage(ctx.canvas, 0, 0);
-  const strength = hit.f === 0 ? 1 : 0.6;
+  const strength = (hit.f === 0 ? 1 : 0.6) * (0.35 + 0.65 * amt(plan.fx.zmlAtmos, 'glitch'));
   // red / cyan split: the red channel one way, green+blue the other
   const dx = Math.round(w * (0.004 + rnd() * 0.006) * strength), c = fit(chan, w, h);
   const channel = (col) => { c.globalCompositeOperation = 'copy'; c.drawImage(scratch, 0, 0); c.globalCompositeOperation = 'multiply'; c.fillStyle = col; c.fillRect(0, 0, w, h); };
@@ -49147,8 +49194,18 @@ function changed() {
   clearTimeout(pending); pending = setTimeout(() => { if (Z.redrawPreview) Z.redrawPreview(); }, 60);
   sync();
 }
-function sync() { for (const [k, id] of Object.entries(BOX)) if ($(id)) $(id).checked = !!pref[k]; }
-for (const [k, id] of Object.entries(BOX)) $(id)?.addEventListener('change', e => { pref[k] = e.target.checked; savePref(); changed(); });
+function sync() {
+  for (const [k, id] of Object.entries(BOX)) {
+    const base = id.replace(/On$/, '');
+    if ($(id)) $(id).checked = !!pref[k];
+    if ($(base + 'Row')) $(base + 'Row').hidden = !pref[k];
+    if ($(base + 'Amount')) { $(base + 'Amount').value = pref[k + 'Amt']; $(base + 'Value').textContent = pref[k + 'Amt'] + '%'; }
+  }
+}
+for (const [k, id] of Object.entries(BOX)) {
+  $(id)?.addEventListener('change', e => { pref[k] = e.target.checked; savePref(); changed(); });
+  $(id.replace(/On$/, 'Amount'))?.addEventListener('input', e => { pref[k + 'Amt'] = +e.target.value; savePref(); changed(); });
+}
 sync();
 })();
 

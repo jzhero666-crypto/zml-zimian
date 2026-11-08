@@ -1121,6 +1121,9 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
       <label class="zml-check"><input id="zmlGlowOn" type="checkbox" checked><span>柔光</span><small>黑底、白底時整個畫面加一層淡淡的發光，白字會微微暈開。不想要就取消勾選（特效圖鑑的勾選管不到這一層；用圖片影片當背景時本來就沒有）；改了預覽會馬上跟著變</small></label>
       <label class="zml-check"><input id="zmlSlashOn" type="checkbox"><span>斜色塊</span><small>背景變黑白，每一下大鼓都有一條彩色斜條，從上下左右斜的不同角度劃過畫面再消失（要放圖片或影片才有效）</small></label>
       <label id="zmlSlashRow" class="zml-mood zml-sub" hidden><span>少</span><input id="zmlSlashAmount" type="range" min="0" max="100" step="5" value="50" aria-label="斜色塊的多寡"><span>多</span><b id="zmlSlashValue">50%</b><small>往左：只跟重的鼓；中間以上：每一下鼓都有；再往右：常常兩條一起來</small></label>
+      <label class="zml-check"><input id="zmlDustOn" type="checkbox"><span>漂浮粒子</span><small>畫面上有細細的白色塵點慢慢飄、忽明忽暗，像舞台燈光裡的灰塵；只在背景上，不蓋歌詞，黑底也有效</small></label>
+      <label class="zml-check"><input id="zmlGlitchOn" type="checkbox"><span>故障</span><small>偶爾在重的鼓點上閃 2～4 格故障：畫面橫向切片錯開、紅青色分離，馬上恢復；只動背景，歌詞不受影響</small></label>
+      <label class="zml-check"><input id="zmlFlickerOn" type="checkbox"><span>光影閃爍</span><small>重拍時整個畫面像過曝一樣亮起來，半秒內慢慢退回；平常光線也會微微晃動。只動背景，歌詞照樣清楚；改了預覽會馬上跟著變</small></label>
       <label class="zml-check"><input id="zmlBandOn" type="checkbox"><span>橫框換圖</span><small>圖片放在畫面中間一條橫框裡，每句歌詞開頭和重拍都換一次：換下一張圖，或同一張換成半身、特寫、上下兩格；換法有直接切、推移、放大切入、故障、3D 翻轉、3D 翻牌。歌詞排在框的上下。只用圖片，影片不會放進框裡</small></label>
       <label id="zmlBandRow" class="zml-mood zml-sub" hidden><span>慢</span><input id="zmlBandPace" type="range" min="0" max="100" step="5" value="50" aria-label="橫框換圖的快慢"><span>快</span><b id="zmlBandValue">50%</b><small>往左：大多只在換句時換；往右：重拍也常換。改了要按「換一版」或重新生成才會套用<span id="zmlBandNote" hidden>（已生成的影片，按「換一版」就會套用）</span></small></label>
       <details id="zmlLutBox" class="zml-fonts zml-lut"><summary>濾鏡<small id="zmlLutNote"></small></summary>
@@ -9470,6 +9473,7 @@ class Renderer {
         ctx.filter = 'none'; ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
       }
     }
+    if (J.zmlAfterBackground && !opt.transparent && !key) J.zmlAfterBackground(ctx, plan, t, cw, ch, scale);   // ZML: 漂浮粒子／故障／光影閃爍 (src/21), behind the lyrics
     // ---------- camera & chroma amounts ----------
     const u = H / 1080;
     const events = plan.events;
@@ -46613,6 +46617,7 @@ const applyLook = (project, options) => {
   project.fx.zmlShadowAmount = J.clamp(Number.isFinite(+pick('shadow')) && pick('shadow') !== undefined ? +pick('shadow') : 60, 0, 100);
   project.fx.zmlSlash = background === 'image' && Z.slashFx ? Z.slashFx(seed) : null;   // 斜色塊, as the page has it
   project.fx.zmlNoGlow = Z.glowPref ? !Z.glowPref().on : false;   // 柔光 (src/20), as the page has it
+  project.fx.zmlAtmos = Z.atmosFx ? Z.atmosFx(seed) : null;   // 漂浮粒子／故障／光影閃爍 (src/21), as the page has it
   project.fx.zmlBandOn = band; project.fx.zmlBand = null;   // 橫框換圖 (src/16z)
   project.fx.zmlLut = background === 'image' && Z.lutFx ? Z.lutFx(seed) : null;   // 濾鏡 on the pictures and videos, as the page has it   // a soft shadow under the lyrics over pictures and videos
   if (readable) Object.assign(project.fx, { glitch: project.fx.glitch * 0.3, chroma: project.fx.chroma * 0.5, decor: project.fx.decor * 0.5 });   // no viewfinder frame, counters or clocks
@@ -48990,6 +48995,160 @@ function changed() {
 }
 function sync() { if ($('zmlGlowOn')) $('zmlGlowOn').checked = !!pref.on; }
 $('zmlGlowOn')?.addEventListener('change', e => { pref.on = e.target.checked; savePref(); changed(); });
+sync();
+})();
+
+/* ============================================================
+   ZML — 氛圍三件組 (the 《吻痕釘》 short): three switches on the 簡易 page, each on its own.
+   - 漂浮粒子: small white dust specks drifting slowly and twinkling, like dust in a stage light.
+   - 故障: now and then, on a strong drum hit, 2–4 frames of sliced, sideways-shifted picture with a red/cyan split.
+   - 光影閃爍: on strong hits the whole picture blows out to grey-white and settles back in about half a second,
+     plus a faint, never-still light flicker in between.
+   All three touch only the background (pictures, videos, or 黑底/白底); lyrics are drawn after, untouched.
+   Hooked in 09_render right after the background (J.zmlAfterBackground). Everything is a pure function of the
+   time and the seed, so preview, 換一版 and frame-by-frame export agree.
+   ============================================================ */
+(() => {
+'use strict';
+const Z = (J.zml = J.zml || {});
+if (typeof document === 'undefined') return;
+const $ = id => document.getElementById(id);
+
+/* ---------------- what the page has chosen ---------------- */
+const PREF = 'zml.atmos.v1';
+const DEF = { dust: false, glitch: false, flicker: false };
+let pref = (() => { try { return Object.assign({}, DEF, JSON.parse(localStorage.getItem(PREF) || '{}')); } catch (e) { return Object.assign({}, DEF); } })();
+const savePref = () => { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) {} };
+Z.atmosPref = () => pref;
+/* what a project carries (null = all off); the seed moves the specks and glitch hits with 換一版 */
+Z.atmosFx = (seed = 0) => (pref.dust || pref.glitch || pref.flicker) ? { dust: !!pref.dust, glitch: !!pref.glitch, flicker: !!pref.flicker, seed } : null;
+
+/* ---------------- when things happen ---------------- */
+const cache = new WeakMap();
+/* the drum hits (strength 0–1); a song with no drum found falls back to line starts */
+function hitList(plan) {
+  const out = [], hits = plan.zmlHits || plan.zmlKicks;
+  if (hits?.t?.length) hits.t.forEach((t, i) => out.push([t, hits.s[i] ?? 0.5]));
+  if (out.length < 4) {
+    const firsts = new Map();
+    for (const c of plan.cuts || []) if (Number.isInteger(c.part) && c.line >= 0 && !(firsts.get(c.line) <= c.start)) firsts.set(c.line, c.start);
+    for (const t of firsts.values()) out.push([t, 0.75]);
+  }
+  return out.sort((a, b) => a[0] - b[0]);
+}
+function events(plan, A) {
+  const c = cache.get(plan); if (c && c.A === A) return c.out;
+  const hits = hitList(plan), rnd = J.rng((A.seed || 0) + 4471);
+  // 光影閃爍: the strong hits, at least 1.1 s apart — in the reference about one big blow-out every 2–4 s
+  const flashes = []; let last = -1e9;
+  for (const [t, s] of hits) if (s >= 0.55 && t - last >= 1.1) { flashes.push({ t, a: 0.35 + 0.55 * J.clamp((s - 0.55) / 0.45) * (0.7 + 0.3 * rnd()) }); last = t; }
+  // 故障: rarer — a strong hit, at least 2.4 s after the last one, and only some of them
+  const glitches = []; last = -1e9;
+  for (const [t, s] of hits) if (s >= 0.65 && t - last >= 2.4 && rnd() < 0.55) { glitches.push({ t, frames: 2 + (rnd() * 3 | 0), seed: rnd() * 1e6 | 0 }); last = t; }
+  // 漂浮粒子: fixed specks; place, drift, size and twinkle from the seed
+  const specks = [];
+  for (let i = 0; i < 90; i++) {
+    const big = rnd() < 0.12;
+    specks.push({ x: rnd(), y: rnd(), vx: (rnd() - 0.5) * 0.010, vy: -(0.003 + rnd() * 0.012), wob: rnd() * 6.28, wf: 0.2 + rnd() * 0.5,
+      r: big ? 1.6 + rnd() * 1.6 : 0.6 + rnd() * 1.1, big, ph: rnd() * 6.28, tf: 0.6 + rnd() * 2.2, base: 0.25 + rnd() * 0.55 });
+  }
+  const out = { flashes, glitches, specks };
+  cache.set(plan, { A, out });
+  return out;
+}
+/* last event at or before t */
+const lastBefore = (list, t) => { let lo = 0, hi = list.length; while (lo < hi) { const m = (lo + hi) >> 1; if (list[m].t <= t) lo = m + 1; else hi = m; } return lo - 1; };
+/* smooth value noise for the light that never sits still */
+const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const noise = x => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return hash(i) * (1 - u) + hash(i + 1) * u; };
+Z.atmosFlashAt = (plan, t) => {   // 0..~1, for tests and look-see tools
+  const A = plan?.fx?.zmlAtmos; if (!A?.flicker) return 0;
+  const ev = events(plan, A), i = lastBefore(ev.flashes, t); if (i < 0) return 0;
+  const age = t - ev.flashes[i].t; return age > 1.2 ? 0 : ev.flashes[i].a * Math.exp(-age / 0.16);
+};
+Z.atmosGlitchAt = (plan, t) => {
+  const A = plan?.fx?.zmlAtmos; if (!A?.glitch) return null;
+  const ev = events(plan, A), i = lastBefore(ev.glitches, t); if (i < 0) return null;
+  const g = ev.glitches[i], f = Math.floor((t - g.t) * 60); return f < g.frames ? { g, f } : null;
+};
+
+/* ---------------- drawing ---------------- */
+const scratch = document.createElement('canvas'), chan = document.createElement('canvas');
+const fit = (c, w, h) => { if (c.width !== w || c.height !== h) { c.width = w; c.height = h; } return c.getContext('2d'); };
+
+function drawDust(ctx, ev, t, w, h, k) {
+  ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#fff';
+  for (const p of ev.specks) {
+    const x = ((p.x + p.vx * t + 0.012 * Math.sin(p.wob + t * p.wf)) % 1 + 1) % 1 * w;
+    const y = ((p.y + p.vy * t) % 1 + 1) % 1 * h;
+    const tw = Math.pow(0.5 + 0.5 * Math.sin(p.ph + t * p.tf), 2), a = p.base * (0.25 + 0.75 * tw);
+    if (a < 0.03) continue;
+    const r = p.r * k;
+    if (p.big) {   // a soft halo round the bigger ones, like out-of-focus dust in the light
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r * 3.2);
+      g.addColorStop(0, `rgba(255,255,255,${a * 0.9})`); g.addColorStop(0.35, `rgba(255,255,255,${a * 0.35})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 3.2, 0, 6.2832); ctx.fill(); ctx.fillStyle = '#fff';
+    } else { ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill(); ctx.globalAlpha = 1; }
+  }
+}
+function drawFlicker(ctx, plan, A, t, w, h) {
+  const flash = Z.atmosFlashAt(plan, t);
+  // the light in between: a slow wobble plus a faster shiver, a few percent either way
+  const amb = (noise(t * 3.1 + (A.seed % 97)) - 0.5) * 0.08 + (noise(t * 13.7 + 50) - 0.5) * 0.04;
+  if (amb < 0) { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = -amb; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h); }
+  else if (amb > 0) { ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = amb; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); }
+  if (flash > 0.01) {
+    // over-exposure: the bright parts burn (the picture added onto itself), then the blacks lift to grey
+    const s = fit(scratch, w, h); s.globalCompositeOperation = 'copy'; s.globalAlpha = 1; s.filter = 'blur(' + Math.round(w / 160) + 'px)'; s.drawImage(ctx.canvas, 0, 0); s.filter = 'none';
+    ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, flash * 1.1); ctx.drawImage(scratch, 0, 0);
+    ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = Math.min(0.85, flash * 0.75); ctx.fillStyle = '#ece9e4'; ctx.fillRect(0, 0, w, h);
+  }
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+}
+function drawGlitch(ctx, plan, t, w, h) {
+  const hit = Z.atmosGlitchAt(plan, t); if (!hit) return;
+  const rnd = J.rng(hit.g.seed + hit.f * 31), s = fit(scratch, w, h);
+  s.globalCompositeOperation = 'copy'; s.globalAlpha = 1; s.filter = 'none'; s.drawImage(ctx.canvas, 0, 0);
+  const strength = hit.f === 0 ? 1 : 0.6;
+  // red / cyan split: the red channel one way, green+blue the other
+  const dx = Math.round(w * (0.004 + rnd() * 0.006) * strength), c = fit(chan, w, h);
+  const channel = (col) => { c.globalCompositeOperation = 'copy'; c.drawImage(scratch, 0, 0); c.globalCompositeOperation = 'multiply'; c.fillStyle = col; c.fillRect(0, 0, w, h); };
+  ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+  ctx.globalCompositeOperation = 'lighter'; channel('#f00'); ctx.drawImage(chan, -dx, 0);
+  ctx.globalCompositeOperation = 'lighter'; channel('#0ff'); ctx.drawImage(chan, dx, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  // a few horizontal slices pushed sideways
+  const n = 3 + (rnd() * 4 | 0);
+  for (let i = 0; i < n; i++) {
+    const y = rnd() * h, sh = h * (0.006 + rnd() * 0.05), off = (rnd() - 0.5) * w * 0.09 * strength;
+    ctx.drawImage(scratch, 0, y, w, sh, off, y, w, sh);
+  }
+  // little dead blocks along an edge, as in the reference
+  ctx.fillStyle = '#000';
+  for (let i = 0, m = rnd() * 4 | 0; i < m; i++) { const bw = w * (0.006 + rnd() * 0.02), bh = h * (0.004 + rnd() * 0.012); ctx.fillRect(rnd() < 0.7 ? 0 : w - bw, rnd() * h, bw, bh); }
+}
+J.zmlAfterBackground = (ctx, plan, t, w, h) => {
+  const A = plan?.fx?.zmlAtmos; if (!A || !w || !h) return;
+  const ev = events(plan, A);
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.filter = 'none';
+  if (A.dust) drawDust(ctx, ev, t, w, h, Math.min(w, h) / 1080 * 1.6);
+  if (A.flicker) drawFlicker(ctx, plan, A, t, w, h);
+  if (A.glitch) drawGlitch(ctx, plan, t, w, h);
+  ctx.restore();
+};
+
+/* ---------------- the controls on the 簡易 page ---------------- */
+if (document.documentElement.lang !== 'zh-Hant' || !$('zmlHome')) return;
+let pending = 0;
+const BOX = { dust: 'zmlDustOn', glitch: 'zmlGlitchOn', flicker: 'zmlFlickerOn' };
+function changed() {
+  const p = J.ui?.project;
+  if (p?.fx) { p.fx.zmlAtmos = Z.atmosFx(p.seed); if (J.ui.plan?.fx) J.ui.plan.fx.zmlAtmos = p.fx.zmlAtmos; }
+  clearTimeout(pending); pending = setTimeout(() => { if (Z.redrawPreview) Z.redrawPreview(); }, 60);
+  sync();
+}
+function sync() { for (const [k, id] of Object.entries(BOX)) if ($(id)) $(id).checked = !!pref[k]; }
+for (const [k, id] of Object.entries(BOX)) $(id)?.addEventListener('change', e => { pref[k] = e.target.checked; savePref(); changed(); });
 sync();
 })();
 

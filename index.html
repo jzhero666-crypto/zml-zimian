@@ -1133,7 +1133,7 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
       <label id="zmlBandRow" class="zml-mood zml-sub" hidden><span>慢</span><input id="zmlBandPace" type="range" min="0" max="100" step="5" value="50" aria-label="橫框換圖的快慢"><span>快</span><b id="zmlBandValue">50%</b><small>往左：大多只在換句時換；往右：重拍也常換。改了要按「換一版」或重新生成才會套用<span id="zmlBandNote" hidden>（已生成的影片，按「換一版」就會套用）</span></small></label>
       <details id="zmlLutBox" class="zml-fonts zml-lut"><summary>濾鏡<small id="zmlLutNote"></small></summary>
         <div class="zml-mark-body">
-          <div class="zml-mark-row"><b>用法</b><div id="zmlLutMode" class="zml-aspect" role="radiogroup" aria-label="濾鏡用法"><button type="button" data-mode="off">不用</button><button type="button" data-mode="one">整支同一個</button><button type="button" data-mode="cycle">每張背景換一個</button></div></div>
+          <div class="zml-mark-row"><b>用法</b><div id="zmlLutMode" class="zml-aspect" role="radiogroup" aria-label="濾鏡用法"><button type="button" data-mode="off">不用</button><button type="button" data-mode="one">整支同一個</button><button type="button" data-mode="cycle">每張背景換一個</button></div><button type="button" id="zmlLutAnother" class="zml-ghost" hidden title="從勾的濾鏡裡另外抽一個，整支都換成它">換一個</button></div>
           <label class="zml-mood zml-mark-row"><b>強度</b><input id="zmlLutStrength" type="range" min="10" max="100" step="5" aria-label="濾鏡強度"><span id="zmlLutStrengthValue"></span></label>
           <div class="zml-ownfonts zml-mark-row"><label class="zml-addfont"><input id="zmlLutFile" type="file" accept=".cube" multiple hidden><span>＋ 加入濾鏡檔（.cube，可一次選很多）</span></label><label class="zml-addfont"><input id="zmlLutDir" type="file" webkitdirectory multiple hidden><span>＋ 加入整個資料夾</span></label><output id="zmlLutAdded"></output></div>
           <div id="zmlLutList" class="zml-lutlist"></div>
@@ -48545,10 +48545,21 @@ Z.lutPref = () => pref;
 Z.tickedLuts = () => pref.ticked.filter(k => Z.LUTS.has(k));
 Z.setLutTicked = (key, on) => { pref.ticked = pref.ticked.filter(k => k !== key); if (on) pref.ticked.push(key); savePref(); changed(); };
 /* what a project carries: the order the looks come in for this seed (the tables stay here) */
+/* 整支同一個: the one look is picked once and kept (pref.one) — 換一版 and 生成 no longer swap it (user 2026-11-08:
+   「勾整部同一濾鏡但還是會換」); 「換一個」 picks another; it is picked again only when it is no longer ticked */
+Z.lutOne = (fresh = false) => {
+  const keys = Z.tickedLuts(); if (!keys.length) return null;
+  if (fresh || !keys.includes(pref.one)) {
+    const others = keys.length > 1 ? keys.filter(k => k !== pref.one) : keys;
+    pref.one = others[Math.floor(Math.random() * others.length)]; savePref();
+  }
+  return pref.one;
+};
 Z.lutFx = (seed = 0) => {
   const keys = Z.tickedLuts(); if (pref.mode === 'off' || !keys.length) return null;
+  if (pref.mode === 'one') return { mode: 'one', strength: pref.strength, keys: [Z.lutOne()] };
   const rnd = J.rng(seed + 7177), order = keys.slice().sort(() => rnd() - 0.5);
-  return { mode: pref.mode, strength: pref.strength, keys: pref.mode === 'one' ? [order[0]] : order };
+  return { mode: pref.mode, strength: pref.strength, keys: order };
 };
 
 /* ---------------- applying a look on the graphics card ---------------- */
@@ -48645,10 +48656,12 @@ function sync() {
   const n = Z.tickedLuts().length;
   for (const b of home.querySelectorAll('#zmlLutMode button')) b.setAttribute('aria-pressed', b.dataset.mode === pref.mode);
   if ($('zmlLutStrength')) { $('zmlLutStrength').value = pref.strength; $('zmlLutStrengthValue').textContent = pref.strength + '%'; }
-  if ($('zmlLutNote')) $('zmlLutNote').textContent = pref.mode === 'off' ? '不用濾鏡' : !n ? '還沒勾任何濾鏡' : pref.mode === 'one' ? `整支用同一個（從勾的 ${n} 個裡抽，換一版會換）` : `背景每換一張就換一個（勾了 ${n} 個）`;
+  if ($('zmlLutNote')) $('zmlLutNote').textContent = pref.mode === 'off' ? '不用濾鏡' : !n ? '還沒勾任何濾鏡' : pref.mode === 'one' ? `整支用「${Z.LUTS.get(Z.lutOne())?.name || ''}」，換一版也不會換` : `背景每換一張就換一個（勾了 ${n} 個）`;
+  if ($('zmlLutAnother')) $('zmlLutAnother').hidden = pref.mode !== 'one' || n < 2;
 }
 Z.refreshLuts = build;
 for (const b of home.querySelectorAll('#zmlLutMode button')) b.addEventListener('click', () => { pref.mode = b.dataset.mode; savePref(); changed(); });
+$('zmlLutAnother')?.addEventListener('click', () => { Z.lutOne(true); changed(); });
 $('zmlLutStrength')?.addEventListener('input', e => { pref.strength = +e.target.value; savePref(); changed(); });
 const add = async files => {
   const out = $('zmlLutAdded'); out.textContent = '讀取中…';

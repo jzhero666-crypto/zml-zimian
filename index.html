@@ -1059,6 +1059,9 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
 .zml-order li span { display: flex; gap: 6px; }
 .zml-order li button { flex: 1; padding: 4px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: inherit; cursor: pointer; }
 .zml-order li button:disabled { opacity: .3; cursor: default; }
+.zml-streamlive { display: flex; flex-direction: column; gap: 0; margin: 0 0 10px; }
+.zml-streamlive .zml-mood { margin-top: 8px; }
+.zml-streamlive .zml-mood > b:first-child { min-width: 5em; color: #d8d4dc; }
 
 </style>
 </head>
@@ -1114,6 +1117,8 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
       <label class="zml-check"><input id="zmlScatter" type="checkbox"><span>位置與大小隨機</span><small>歌詞不固定在中間：每句換一個位置，字忽大忽小（同進階剪輯器的「位置與大小也自動變化」）；和「中間留給角色」一起勾時，以中間留給角色為準</small></label>
       <label class="zml-check"><input id="zmlTypeOnly" type="checkbox"><span>純文字排版</span><small>只用字本身做排版，不要票券、卡帶、報紙這類道具、裝飾圖形，也不要小數字和時間碼</small></label>
       <label class="zml-mood"><span>陰影 淡</span><input id="zmlShadowAmount" type="range" min="0" max="100" step="5" value="60" aria-label="歌詞陰影"><span>濃</span><small id="zmlShadowValue">60%</small><small>背景是圖片或影片時，歌詞底下的陰影；背景偏白、或開了疊化字看不清楚時往右拉</small></label>
+      <label class="zml-check"><input id="zmlPlainOn" type="checkbox"><span>純置中字幕</span><small>每句歌詞就是一行乾淨的置中字幕：整句一起出現、淡入淡出，同一套字體、白字加柔陰影，不排版、不加裝飾、不逐字。適合意識流、讓畫面說話的 MV；取消勾選會重新排一版</small></label>
+      <label id="zmlPlainRow" class="zml-mood zml-sub" hidden><span>小</span><input id="zmlPlainSize" type="range" min="50" max="200" step="5" value="100" aria-label="字幕大小"><span>大</span><b id="zmlPlainValue">100%</b><small>字幕大小；太長的句子會自動分兩行、再縮到放得下。改了預覽馬上跟著變</small></label>
       <label class="zml-check"><input id="zmlEcho" type="checkbox"><span>副歌呼應</span><small>重複唱的歌詞（像副歌）用跟第一次一模一樣的排版、動作和字體，其他句子照常隨機變化，聽得出歌的段落</small></label>
       <label class="zml-check"><input id="zmlReadable" type="checkbox"><span>好讀優先</span><small>只用字夠大的排版，每句最多一個裝飾，故障和色偏減弱；歌詞很長、或想讓人看清楚歌詞時用</small></label>
       <details id="zmlMarkBox" class="zml-fonts zml-mark"><summary>浮水印<small id="zmlMarkNote"></small></summary>
@@ -1138,6 +1143,12 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
       <label id="zmlGlitchRow" class="zml-mood zml-sub" hidden><span>弱</span><input id="zmlGlitchAmount" type="range" min="5" max="100" step="5" aria-label="故障的強弱"><span>強</span><b id="zmlGlitchValue"></b><small>往左：很少出現、錯位很小；往右：常出現、切得比較開；改了預覽馬上跟著變</small></label>
       <label class="zml-check"><input id="zmlFlickerOn" type="checkbox"><span>光影閃爍</span><small>重拍時整個畫面像過曝一樣亮起來，半秒內慢慢退回；平常光線也會微微晃動。只動背景，歌詞照樣清楚；改了預覽會馬上跟著變</small></label>
       <label id="zmlFlickerRow" class="zml-mood zml-sub" hidden><span>弱</span><input id="zmlFlickerAmount" type="range" min="5" max="100" step="5" aria-label="光影閃爍的強弱"><span>強</span><b id="zmlFlickerValue"></b><small>往左：只在最重的鼓輕輕亮一下；往右：每個重拍都爆白；改了預覽馬上跟著變</small></label>
+      <div class="zml-mood zml-interlude"><b>間奏畫面</b><div id="zmlInterlude" class="zml-aspect" role="radiogroup" aria-label="間奏畫面"></div><small>沒有歌詞的間奏時，畫面中間放什麼：都跟著音樂的大小聲動，間奏開始和結束時淡入淡出。生成後也能在預覽下面換</small></div>
+      <label class="zml-check"><input id="zmlGrainOn" type="checkbox"><span>底片噪點</span><small>整片加上老底片的顆粒，偶爾有灰塵點和刮痕，一秒 24 格地跳；只在背景上，不蓋歌詞，黑底也有效</small></label>
+      <label id="zmlGrainRow" class="zml-mood zml-sub" hidden><span>弱</span><input id="zmlGrainAmount" type="range" min="5" max="100" step="5" value="40" aria-label="底片噪點的強弱"><span>強</span><b id="zmlGrainValue">40%</b><small>往左：細細一層；往右：顆粒粗、灰塵刮痕多。改了預覽馬上跟著變</small></label>
+      <label class="zml-check"><input id="zmlBeatCutOn" type="checkbox"><span>跟鼓點換圖（意識流）</span><small>圖片和影片照真的大鼓換：一下鼓一刀直接切換，沒有轉場特效（要放圖片或影片才有效；和橫框換圖一起勾時，以橫框換圖為準）</small></label>
+      <label id="zmlBeatCutRow" class="zml-mood zml-sub" hidden><span>快</span><input id="zmlBeatCutAmount" type="range" min="1" max="8" step="0.5" value="2" aria-label="換圖速度"><span>慢</span><b id="zmlBeatCutValue">至少 2 拍</b><small>一個畫面至少停幾拍才換：快歌 1～2，慢歌往右拉到 4～8。生成後拉，預覽馬上重排</small></label>
+      <label id="zmlBeatMoveRow" class="zml-check zml-sub" hidden><input id="zmlBeatMove" type="checkbox"><span>畫面慢慢動</span><small>不勾＝直接切、畫面不動（預設）；勾了每個畫面會慢慢推近、拉遠或平移</small></label>
       <label class="zml-check"><input id="zmlBandOn" type="checkbox"><span>橫框換圖</span><small>圖片放在畫面中間一條橫框裡，每句歌詞開頭和重拍都換一次：換下一張圖，或同一張換成半身、特寫、上下兩格；換法有直接切、推移、放大切入、故障、3D 翻轉、3D 翻牌。歌詞排在框的上下。只用圖片，影片不會放進框裡</small></label>
       <label id="zmlBandRow" class="zml-mood zml-sub" hidden><span>慢</span><input id="zmlBandPace" type="range" min="0" max="100" step="5" value="50" aria-label="橫框換圖的快慢"><span>快</span><b id="zmlBandValue">50%</b><small>往左：大多只在換句時換；往右：重拍也常換。改了要按「換一版」或重新生成才會套用<span id="zmlBandNote" hidden>（已生成的影片，按「換一版」就會套用）</span></small></label>
       <details id="zmlLutBox" class="zml-fonts zml-lut"><summary>濾鏡<small id="zmlLutNote"></small></summary>
@@ -1169,6 +1180,12 @@ body.zml-preset-on #zmlThemes, body.zml-preset-on #zmlStyles { opacity: .35; }
     <div id="zmlPreview" class="zml-preview"><canvas></canvas><audio controls></audio><p id="zmlNowInfo" class="zml-nowinfo" aria-live="off"></p></div>
     <p id="zmlHookWhere" class="zml-note zml-hookwhere" hidden></p>
     <label class="zml-hook zml-hook-live"><b>前奏引言</b><small>在這裡改，預覽會跟著變</small><textarea id="zmlHookLive" rows="2" maxlength="240"></textarea></label>
+    <div id="zmlStreamLive" class="zml-streamlive">
+      <div class="zml-mood"><b>間奏畫面</b><div id="zmlInterludeLive" class="zml-aspect" role="radiogroup" aria-label="間奏畫面"></div></div>
+      <label id="zmlBeatCutLiveRow" class="zml-mood" hidden><b>換圖速度</b><span>快</span><input id="zmlBeatCutLive" type="range" min="1" max="8" step="0.5" aria-label="換圖速度"><span>慢</span><b id="zmlBeatCutLiveValue"></b></label>
+      <label id="zmlPlainLiveRow" class="zml-mood" hidden><b>字幕大小</b><span>小</span><input id="zmlPlainSizeLive" type="range" min="50" max="200" step="5" aria-label="字幕大小"><span>大</span><b id="zmlPlainLiveValue"></b></label>
+      <label id="zmlGrainLiveRow" class="zml-mood" hidden><b>底片噪點</b><span>弱</span><input id="zmlGrainLive" type="range" min="5" max="100" step="5" aria-label="底片噪點的強弱"><span>強</span><b id="zmlGrainLiveValue"></b></label>
+    </div>
     <div class="zml-row zml-actions">
       <button id="zmlBack" type="button" class="zml-ghost">← 重新選</button>
       <button id="zmlReroll" type="button">換一版</button>
@@ -69241,6 +69258,7 @@ const applyLook = (project, options) => {
   const tone = background === 'white' ? schemes.find(s => J.lum(s.bg) > 0.8) : dark;
   const from = tone || schemes[0];
   project.colors = Object.assign({}, project.colors, { enabled: true, allSchemes: true }, plain, { accentOn: true, accent: from.accent, accent2: from.accent2, ghostA: from.ghostA, ghostB: from.ghostB });
+  if (Z.afterLook) Z.afterLook(project, { background, seed });   // 底片噪點／跟鼓點換圖／純置中字幕 (src/23), as the page has them
   return project;
 };
 
@@ -69784,6 +69802,8 @@ function drawInterlude(ctx, plan, t, gap) {
   const intro = gap[0] < 0.01;
   // a 前奏引言 line on screen takes the centre: the ring fades back
   const hook = Z.hookAt ? Z.hookAt(plan, t) : null, quiet = hook ? 1 - hook.alpha : 1;
+  // 間奏畫面 (src/23): another style chosen on the page draws instead of the ring
+  if (Z.drawInterludeStyle && Z.drawInterludeStyle(ctx, plan, t, gap, { alpha, quiet, media, energyAt, sc })) { ctx.restore(); return; }
   ctx.globalAlpha = alpha * quiet * (media ? 0.75 : 0.9);
   if (!intro && quiet > 0.01) {
   ctx.lineCap = 'round'; ctx.lineWidth = Math.max(2, unit * 0.0045);
@@ -71847,6 +71867,327 @@ function sync() {
 if (!document.getElementById('zmlHome')) return;
 $('zmlExtra2On')?.addEventListener('change', e => { pref.on = e.target.checked; savePref(); sync(); });
 sync();
+})();
+
+/* ============================================================
+   ZML — 意識流三件組 (from the 拼貼剪輯台, 2026-11-19; user: 噪點故障閃光、最簡單的置中字幕、隨著鼓點變換的意識流、調字型大小)
+   - 底片噪點: film grain over the background, plus film dust and now and then a scratch, changing at 24 frames a second.
+   - 跟鼓點換圖: the pictures and videos change on real kick drums, at least N beats apart (slider, applied at once),
+     each shot a hard cut that then creeps one way (push / pull / pan / diagonal — never floating or swinging).
+   - 純置中字幕: every line is one plain centred subtitle — the whole line, one face, white with the soft shadow,
+     fading in and out over a quarter second; no props, no treatments, no per-character anything. Size slider.
+   故障 and 光影閃爍 already live in src/21 (漂浮粒子／故障／光影閃爍).
+   Hooks: J.zmlAfterBackground (chained after src/21), Z.scheduleMedia (wrapped), Z.afterLook (called at the end of
+   applyLook in src/13a), J.LAYOUTS.center (drawn as a plain subtitle when plan.fx.zmlPlainSub is set).
+   ============================================================ */
+(() => {
+'use strict';
+const Z = (J.zml = J.zml || {});
+const hasDoc = typeof document !== 'undefined';
+const hasStore = typeof localStorage !== 'undefined';
+
+/* ---------------- what the page has chosen ---------------- */
+const PREF = 'zml.stream.v1';
+const DEF = { grain: false, grainAmt: 40, beat: false, beats: 2, beatMove: false, plain: false, plainSize: 100, interlude: 'ring' };
+let pref = (() => { try { return Object.assign({}, DEF, JSON.parse((hasStore && localStorage.getItem(PREF)) || '{}')); } catch (e) { return Object.assign({}, DEF); } })();
+const savePref = () => { try { hasStore && localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) {} };
+Z.streamPref = () => pref;
+Z.setStreamPref = p => { Object.assign(pref, p); savePref(); };   // for tests and look-see tools
+
+/* applyLook (src/13a) calls this last: the page's switches go onto the project */
+Z.afterLook = (project, { background } = {}) => {
+  const fx = (project.fx = project.fx || {});
+  fx.zmlGrain = pref.grain ? { amt: pref.grainAmt, seed: project.seed | 0 } : null;
+  fx.zmlBeatCut = pref.beat && background === 'image' ? { beats: pref.beats, move: !!pref.beatMove } : null;
+  setPlain(project, !!pref.plain);
+  fx.zmlInterlude = pref.interlude || 'ring';
+};
+
+/* ================= 間奏畫面 (user: 等待間奏時只能是圓形嘛？) =================
+   src/13e draws the interludes; it asks here first. 'ring' = its own ring of bars (returns false). Every style
+   follows the song's loudness, fades in and out with the interlude, sits back while a 前奏引言 line is up, and
+   never shows a small song name (user, 2026-10-24). None of them float, swing or breathe the picture. */
+Z.INTERLUDES = [['ring', '圓環'], ['wave', '波形線'], ['bars', '頻譜條'], ['mirror', '鏡像頻譜'], ['ecg', '心電圖'], ['ripple', '鼓點漣漪'],
+  ['square', '方框'], ['line', '一條細線'], ['dots', '光點'], ['progress', '進度條'], ['countdown', '倒數秒數'], ['random', '每段間奏隨機換'], ['none', '不要，只留畫面']];
+const DRAWN = Z.INTERLUDES.map(x => x[0]).filter(k => !['random', 'none'].includes(k));
+/* 每段間奏隨機換: each interlude its own style, the same one every time the MV is drawn */
+const styleOf = (plan, gap) => {
+  const style = plan.fx?.zmlInterlude || 'ring';
+  if (style !== 'random') return style;
+  const i = Z.gaps(plan).findIndex(g => g[0] === gap[0]);
+  return DRAWN[J.h(plan.seed | 0, i + 1, 31) % DRAWN.length];
+};
+Z.interludeStyleAt = styleOf;   // for tests
+Z.drawInterludeStyle = (ctx, plan, t, gap, { alpha, quiet, media, energyAt, sc }) => {
+  const style = styleOf(plan, gap);
+  if (style === 'ring') return false;
+  if (style === 'none' || gap[0] < 0.01 || quiet <= 0.01) return true;   // the intro keeps its own title card / hook
+  const w = ctx.canvas.width, h = ctx.canvas.height, unit = Math.min(w, h), cx = w / 2, cy = h / 2;
+  const fg = media ? '#FFFFFF' : sc.fg, acc = sc.accent, A = alpha * quiet * (media ? 0.8 : 0.9);
+  const hits = plan.zmlKicks || plan.zmlHits || { t: [], s: [] };
+  const recent = (span) => { const out = []; for (let i = 0; i < hits.t.length; i++) { const d = t - hits.t[i]; if (d >= 0 && d < span && (hits.s[i] ?? 0.5) >= 0.25) out.push([d, hits.s[i] ?? 0.5]); } return out; };
+  ctx.globalAlpha = A; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const thin = Math.max(1.5, unit * 0.0028);
+  if (style === 'wave') {
+    // a loudness line drawn across the middle: the last two seconds scroll from right to left
+    const span = w * 0.62, x0 = cx - span / 2, n = 120;
+    ctx.strokeStyle = fg; ctx.lineWidth = thin; ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const u = i / n, e = energyAt(t - (1 - u) * 2), env = Math.sin(u * Math.PI);
+      const y = cy + Math.sin(u * 46 + t * 7) * unit * (0.012 + 0.11 * e * e) * env;
+      if (i) ctx.lineTo(x0 + u * span, y); else ctx.moveTo(x0, y);
+    }
+    ctx.stroke();
+    ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(x0 + span, cy, Math.max(2, unit * 0.005), 0, J.TAU); ctx.fill();
+  } else if (style === 'bars' || style === 'mirror') {
+    // a row of bars, each a little behind the one before; 鏡像 grows up and down from the middle line
+    const mirror = style === 'mirror', n = mirror ? 40 : 48, span = w * 0.5, x0 = cx - span / 2, base = mirror ? cy : h * 0.72, bw = span / n * 0.5;
+    for (let i = 0; i < n; i++) {
+      const lag = mirror ? Math.abs(i / (n - 1) * 2 - 1) : 1 - Math.abs(i / (n - 1) * 2 - 1), e = energyAt(t - lag * 0.5), len = unit * (0.006 + (mirror ? 0.1 : 0.16) * e * e);
+      ctx.fillStyle = i % 8 === 0 ? acc : fg; ctx.fillRect(x0 + i * span / n, base - len, bw, mirror ? len * 2 : len);
+    }
+    if (!mirror) { ctx.globalAlpha = A * 0.5; ctx.fillStyle = fg; ctx.fillRect(x0, base + unit * 0.006, span, Math.max(1, unit * 0.0015)); }
+  } else if (style === 'ecg') {
+    // a heart-monitor line: flat, with a spike where each kick landed, scrolling right to left; the newest at the right
+    const span = w * 0.6, x0 = cx - span / 2, look = 2.6, n = 260;
+    ctx.strokeStyle = fg; ctx.lineWidth = thin; ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const u = i / n, at = t - (1 - u) * look; let y = 0;
+      for (let k = 0; k < hits.t.length; k++) { const d = (at - hits.t[k]) / 0.035; if (d > -3 && d < 5) y += (hits.s[k] ?? 0.5) * (Math.exp(-d * d) - 0.45 * Math.exp(-(d - 1.6) * (d - 1.6))); }
+      const fade = Math.min(1, u * 4);
+      if (i) ctx.lineTo(x0 + u * span, cy - y * unit * 0.16 * fade); else ctx.moveTo(x0, cy);
+    }
+    ctx.stroke();
+    ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(x0 + span, cy, Math.max(2, unit * 0.006), 0, J.TAU); ctx.fill();
+  } else if (style === 'ripple') {
+    // every kick sends out one thin ring from the centre that widens and fades
+    ctx.lineWidth = Math.max(1, unit * 0.0022);
+    for (const [d, s] of recent(1.6)) { const u = d / 1.6; ctx.strokeStyle = fg; ctx.globalAlpha = A * s * (1 - u) * (1 - u); ctx.beginPath(); ctx.arc(cx, cy, unit * (0.04 + 0.34 * Math.sqrt(u)), 0, J.TAU); ctx.stroke(); }
+    ctx.globalAlpha = A; ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(cx, cy, unit * (0.005 + 0.006 * energyAt(t)), 0, J.TAU); ctx.fill();
+  } else if (style === 'square') {
+    // a thin square that opens with the loudness, a smaller accent one inside
+    const e = energyAt(t), s1 = unit * (0.16 + 0.12 * e * e), s2 = unit * (0.07 + 0.05 * energyAt(t - 0.15));
+    ctx.lineWidth = thin; ctx.strokeStyle = fg; ctx.strokeRect(cx - s1 / 2, cy - s1 / 2, s1, s1);
+    ctx.strokeStyle = acc; ctx.lineWidth = Math.max(1, unit * 0.0018); ctx.strokeRect(cx - s2 / 2, cy - s2 / 2, s2, s2);
+  } else if (style === 'line') {
+    // one thin line through the centre that grows and shrinks with the loudness, an accent tick at each end
+    const e = energyAt(t), half = w * (0.06 + 0.3 * e * e);
+    ctx.strokeStyle = fg; ctx.lineWidth = Math.max(1, unit * 0.0018); ctx.beginPath(); ctx.moveTo(cx - half, cy); ctx.lineTo(cx + half, cy); ctx.stroke();
+    ctx.strokeStyle = acc; ctx.lineWidth = Math.max(1.5, unit * 0.003);
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(cx + s * half, cy - unit * 0.012); ctx.lineTo(cx + s * half, cy + unit * 0.012); ctx.stroke(); }
+  } else if (style === 'dots') {
+    // seven dots in a row; each lights up with the loudness a moment apart
+    const n = 7, gapX = unit * 0.06;
+    for (let i = 0; i < n; i++) {
+      const e = energyAt(t - Math.abs(i - (n - 1) / 2) * 0.12), r = unit * (0.004 + 0.012 * e);
+      ctx.fillStyle = i === (n - 1) / 2 ? acc : fg; ctx.globalAlpha = A * (0.35 + 0.6 * e);
+      ctx.beginPath(); ctx.arc(cx + (i - (n - 1) / 2) * gapX, cy, r, 0, J.TAU); ctx.fill();
+    }
+  } else if (style === 'progress') {
+    // how far into the interlude: a faint track, the filled part, a dot at its head
+    const span = w * 0.4, x0 = cx - span / 2, u = J.clamp((t - gap[0]) / Math.max(0.1, gap[1] - gap[0])), hgt = Math.max(1, unit * 0.002);
+    ctx.globalAlpha = A * 0.3; ctx.fillStyle = fg; ctx.fillRect(x0, cy - hgt / 2, span, hgt);
+    ctx.globalAlpha = A; ctx.fillRect(x0, cy - hgt / 2, span * u, hgt);
+    ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(x0 + span * u, cy, unit * (0.005 + 0.004 * energyAt(t)), 0, J.TAU); ctx.fill();
+  } else if (style === 'countdown') {
+    // the seconds left until the singing comes back, small and thin
+    const left = Math.max(0, Math.ceil(gap[1] - t)), txt = '0:' + String(left).padStart(2, '0'), size = unit * 0.045;
+    ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '300 ' + Math.round(size) + 'px "Noto Sans Mono", "Consolas", monospace';
+    ctx.fillText(txt, cx, cy);
+    ctx.fillStyle = acc; ctx.fillRect(cx - size * 0.9, cy + size * 0.75, size * 1.8 * (0.25 + 0.75 * energyAt(t)), Math.max(1, unit * 0.002));
+  }
+  return true;
+};
+
+/* ================= 底片噪點 ================= */
+let NOISE = null;
+const noiseTile = () => {
+  if (NOISE || !hasDoc) return NOISE;
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const x = c.getContext('2d'), d = x.createImageData(256, 256), r = J.rng(99);
+  for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  x.putImageData(d, 0, 0); return (NOISE = c);
+};
+function drawGrain(ctx, G, t, w, h) {
+  const k = J.clamp((+G.amt || 0) / 100), f = Math.floor(t * 24), r = J.rng((G.seed | 0) * 7 + f * 131 + 17), px = Math.max(1, Math.round(Math.min(w, h) / 1080));
+  // grain: the noise tile at a new offset every film frame, laid over (overlay keeps blacks black and whites white)
+  const tile = noiseTile();
+  if (tile) {
+    const pat = ctx.createPattern(tile, 'repeat');
+    pat.setTransform(new DOMMatrix().translate(r() * 256 * px, r() * 256 * px).scale(px));
+    ctx.globalCompositeOperation = 'overlay'; ctx.globalAlpha = 0.12 + 0.4 * k; ctx.fillStyle = pat; ctx.fillRect(0, 0, w, h);
+  }
+  // film dust: a few specks for one film frame, now and then a hair or a scratch
+  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  const n = Math.floor(r() * 7 * k), s = Math.min(w, h) / 1080;
+  for (let i = 0; i < n; i++) {
+    ctx.fillStyle = r() < 0.7 ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.55)';
+    ctx.beginPath(); ctx.ellipse(r() * w, r() * h, (1 + r() * 2.5) * s, (1 + r() * 2.5) * s, r() * 3, 0, 6.2832); ctx.fill();
+  }
+  if (r() < 0.18 * k) { ctx.fillStyle = 'rgba(255,255,255,.2)'; ctx.fillRect(r() * w, r() * h * 0.4, Math.max(1, s), h * (0.3 + r() * 0.7)); }
+  if (r() < 0.05 * k) {
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = Math.max(1, 1.5 * s); ctx.beginPath();
+    const x = r() * w, y = r() * h; ctx.moveTo(x, y); ctx.bezierCurveTo(x + 30 * s, y + 10 * s, x + 10 * s, y + 40 * s, x + 50 * s * r(), y + 60 * s * r()); ctx.stroke();
+  }
+}
+const before = J.zmlAfterBackground;
+J.zmlAfterBackground = (ctx, plan, t, w, h, ...rest) => {
+  if (before) before(ctx, plan, t, w, h, ...rest);
+  const G = plan?.fx?.zmlGrain; if (!G || !w || !h) return;
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.filter = 'none';
+  drawGrain(ctx, G, t, w, h);
+  ctx.restore();
+};
+
+/* ================= 跟鼓點換圖 ================= */
+const HOLDS = ['push', 'pull', 'push', 'diagonal', 'pan'];
+/* where the shots change: on kicks at least `beats` beats apart; a long stretch with no drum still changes */
+Z.beatCutTimes = (plan, beats, bpm) => {
+  const beat = 60 / (bpm > 40 && bpm < 240 ? bpm : 120), dur = plan.duration || 0;
+  const min = Math.max(0.25, beats * beat * 0.93), far = Math.max(beat * 6, beats * beat * 2.2), step = Math.max(beat * 4, beats * beat);
+  const hits = plan.zmlKicks || plan.zmlHits, pts = [0];
+  if (hits?.t) hits.t.forEach((t, i) => { if ((hits.s[i] ?? 0.5) >= 0.2 && t > pts[pts.length - 1] + min && t < dur - 0.3) pts.push(+t.toFixed(3)); });
+  for (let i = 0; i < pts.length; i++) { const next = i + 1 < pts.length ? pts[i + 1] : dur; if (next - pts[i] > far) pts.splice(i + 1, 0, +(pts[i] + step).toFixed(3)); }
+  return pts;
+};
+const schedule = Z.scheduleMedia;
+Z.scheduleMedia = (project, plan, seed = 0) => {
+  const B = project.fx?.zmlBeatCut;
+  if (!B || project.fx?.zmlBandOn || !project.media?.items?.length || !plan) return schedule(project, plan, seed);
+  const media = project.media, items = media.items, bpm = +J.ui?.audio?.bpm || +project.timing?.bpm || 120;
+  const times = Z.beatCutTimes(plan, J.clamp(+B.beats || 2, 0.5, 16), bpm), rnd = J.rng(seed + 9127);
+  const overrides = {}, lineTimes = {}; let hold = '';
+  times.forEach((t, i) => {
+    const item = items[i % items.length], len = (i + 1 < times.length ? times[i + 1] : plan.duration) - t;
+    // a plain cut and a still picture (user 2026-11-19: 直接切 不要特效); the slow move only when ticked
+    if (B.move) { const pool = HOLDS.filter(x => x !== hold); hold = pool[rnd() * pool.length | 0]; } else hold = 'still';
+    overrides[i] = { itemId: item.id, technique: 'legacy', layout: 'cover', enter: 'cut', exit: 'cut', hold, treat: 'none', trans: 'none' };   // 'none': the media layer would otherwise add a random push/wipe 65% of the time
+    // a video plays from a random point of its own; a shot longer than what is left of it loops
+    if (item.type === 'video') Object.assign(overrides[i], { videoStart: +(rnd() * Math.max(0, (+item.duration || 0) - len - 0.1)).toFixed(2), videoLoop: (+item.duration || 0) < len + 0.1 });
+    lineTimes[i] = t;
+  });
+  Object.assign(media, { manualCuts: true, randomOrder: false, loop: false, cutCount: times.length, cutOverrides: overrides, blend: 'normal', opacity: project.fx.zmlBlendIn || J.STYLES[project.style]?.mediaFull ? 100 : 85 });
+  media.timing = Object.assign({}, media.timing, { lineTimes });
+  media.effects = Object.assign({}, media.effects, { motion: 0.6, autoPlacement: false, duration: 0.9 });
+};
+
+/* ================= 純置中字幕 ================= */
+// one cut per line (the whole line at once), only the centre layout, no ornaments or text treatments
+function setPlain(project, on) {
+  const fx = project.fx;
+  const lines = J.parseLyrics ? J.parseLyrics(project.lyrics || '').lines.length : 0;
+  project.overrides = project.overrides || {};
+  for (let i = 0; i < lines; i++) {
+    const ov = project.overrides[i];
+    if (on) project.overrides[i] = Object.assign({}, ov, ov?.single ? {} : { single: true, zmlPS: true });
+    else if (ov?.zmlPS) { const { single, zmlPS, ...restOv } = ov; if (Object.keys(restOv).length) project.overrides[i] = restOv; else delete project.overrides[i]; }
+  }
+  fx.zmlPlainSub = on ? { size: pref.plainSize } : null;
+  if (!on) return;
+  const en = project.enabled || {};
+  if (en.layout) for (const key of Object.keys(en.layout)) en.layout[key] = key === 'center';
+  if (en.decor) for (const key of Object.keys(en.decor)) en.decor[key] = false;
+  if (en.treat) for (const key of Object.keys(en.treat)) en.treat[key] = key === 'none';
+  // nothing between or behind the lines either: no cut-to-cut transitions (shattering triangles, tiles), no lyric
+  // background graphics, no glitch/flash events on the words (故障／光影閃爍 in src/21 work on the picture instead)
+  if (en.bg) for (const key of Object.keys(en.bg)) en.bg[key] = key === 'none';
+  for (const group of ['trans', 'fx']) if (en[group]) for (const key of Object.keys(en[group])) en[group][key] = false;
+  // and the words never shake: no handheld/twitch camera or hold on the lyric layer, only the slow push
+  if (en.cam) for (const key of Object.keys(en.cam)) en.cam[key] = key === 'push';
+  if (en.hold) for (const key of Object.keys(en.hold)) en.hold[key] = key === 'still';
+  fx.decor = 0; fx.hud = 'off'; fx.zmlHideNumbers = true;
+  project.lyricEffects = Object.assign({}, project.lyricEffects, { autoPlacement: false });
+}
+const center = J.LAYOUTS?.center;
+if (center) {
+  const own = center.render;
+  center.render = function (env) {
+    const P = env.fx?.zmlPlainSub; if (!P) return own.call(this, env);
+    const { W, H, sc } = env, cut = env.cut, k = J.clamp((+P.size || 100) / 100, 0.4, 2.5);
+    const text = String(cut.lineText || cut.text || '').replace(/\s*\n\s*/g, ' ').trim(); if (!text) return null;
+    const font = J.fontsOf(env.st, ['serif', 'body'])[0];
+    // always a soft white on a dark or picture background (a style's neon text colour looked cheap); dark text only on 白底
+    // a subtitle size, from the short side, so 16:9, 9:16 and 1:1 read the same; long lines go to two rows, then shrink
+    let size = Math.min(W, H) * 0.058 * k, rows = text;
+    const per = Math.max(4, Math.floor(W * 0.86 / (size * (J.isLatinText && J.isLatinText(text) ? 0.55 : 1.04))));
+    if ([...text].length > per) rows = J.splitLines(text, Math.ceil([...text].length / 2));
+    size = Math.min(size, J.fitSize(rows, font, W * 0.88, H * 0.42, { track: 0.04, lead: 1.35 }));
+    const lt = env.lt, d = Math.max(0.1, cut.dur), f = Math.min(0.25, d / 3);
+    const alpha = J.clamp(lt / f) * J.clamp((d - lt) / f);
+    if (alpha <= 0.002) return null;
+    return J.mainDraw(env, { text: rows, font, size, x: W / 2, y: H / 2, track: 0.04, lead: 1.35, color: J.lum(sc.bg) < 0.5 ? '#F4F2EE' : sc.fg, alpha, enter: 'cut', exit: 'cut', hold: 'still', plain: true, ghost: false });
+  };
+}
+
+/* ---------------- the controls on the 簡易 page ---------------- */
+if (!hasDoc || document.documentElement.lang !== 'zh-Hant') return;
+const $ = id => document.getElementById(id);
+if (!$('zmlHome')) return;
+const beatSec = () => { const bpm = +J.ui?.audio?.bpm; return bpm > 0 ? `（約 ${(pref.beats * 60 / bpm).toFixed(1)} 秒）` : ''; };
+function sync() {
+  const set = (id, on) => { if ($(id)) $(id).checked = !!on; };
+  set('zmlGrainOn', pref.grain); set('zmlBeatCutOn', pref.beat); set('zmlPlainOn', pref.plain);
+  if ($('zmlGrainRow')) $('zmlGrainRow').hidden = !pref.grain;
+  if ($('zmlBeatCutRow')) $('zmlBeatCutRow').hidden = !pref.beat;
+  if ($('zmlBeatMoveRow')) { $('zmlBeatMoveRow').hidden = !pref.beat; $('zmlBeatMove').checked = !!pref.beatMove; }
+  if ($('zmlPlainRow')) $('zmlPlainRow').hidden = !pref.plain;
+  if ($('zmlGrainAmount')) { $('zmlGrainAmount').value = pref.grainAmt; $('zmlGrainValue').textContent = pref.grainAmt + '%'; }
+  if ($('zmlBeatCutAmount')) { $('zmlBeatCutAmount').value = pref.beats; $('zmlBeatCutValue').textContent = `至少 ${pref.beats} 拍${beatSec()}`; }
+  if ($('zmlPlainSize')) { $('zmlPlainSize').value = pref.plainSize; $('zmlPlainValue').textContent = pref.plainSize + '%'; }
+  // the same sliders under the preview, shown for what this MV has on, so they can be tuned while watching
+  const fx = J.ui?.project?.fx || {};
+  const live = (row, input, value, show, v, text) => { if (!$(row)) return; $(row).hidden = !show; $(input).value = v; $(value).textContent = text; };
+  live('zmlBeatCutLiveRow', 'zmlBeatCutLive', 'zmlBeatCutLiveValue', !!fx.zmlBeatCut, pref.beats, `至少 ${pref.beats} 拍${beatSec()}`);
+  live('zmlPlainLiveRow', 'zmlPlainSizeLive', 'zmlPlainLiveValue', !!fx.zmlPlainSub, pref.plainSize, pref.plainSize + '%');
+  live('zmlGrainLiveRow', 'zmlGrainLive', 'zmlGrainLiveValue', !!fx.zmlGrain, pref.grainAmt, pref.grainAmt + '%');
+  for (const box of ['zmlInterlude', 'zmlInterludeLive']) for (const b of $(box)?.children || []) b.setAttribute('aria-pressed', String(b.dataset.style === pref.interlude));
+}
+// 間奏畫面: one row of buttons on the 簡易 page and the same row under the preview; applied at once
+for (const box of ['zmlInterlude', 'zmlInterludeLive']) {
+  const el = $(box); if (!el) continue;
+  el.innerHTML = Z.INTERLUDES.map(([key, name]) => `<button type="button" data-style="${key}" aria-pressed="false">${name}</button>`).join('');
+  el.addEventListener('click', e => {
+    const b = e.target.closest('button[data-style]'); if (!b) return;
+    pref.interlude = b.dataset.style; savePref();
+    const p = J.ui?.project; if (p?.fx) { p.fx.zmlInterlude = pref.interlude; if (J.ui.plan?.fx) J.ui.plan.fx.zmlInterlude = pref.interlude; }
+    sync(); redraw();
+  });
+}
+let pending = 0;
+const redraw = () => { clearTimeout(pending); pending = setTimeout(() => { if (Z.redrawPreview) Z.redrawPreview(); }, 40); };
+/* the live project and plan follow the page at once: nothing needs 換一版 */
+function apply(what) {
+  const p = J.ui?.project; if (!p?.fx) return sync();
+  const bg = Z.last?.background;
+  if (what === 'grain') { p.fx.zmlGrain = pref.grain ? { amt: pref.grainAmt, seed: p.seed | 0 } : null; if (J.ui.plan?.fx) J.ui.plan.fx.zmlGrain = p.fx.zmlGrain; }
+  if (what === 'size' && p.fx.zmlPlainSub) { p.fx.zmlPlainSub = { size: pref.plainSize }; if (J.ui.plan?.fx) J.ui.plan.fx.zmlPlainSub = p.fx.zmlPlainSub; }
+  if (what === 'plain') {
+    // turning it off gives the lines back their variety only through a new draw (the layouts were narrowed)
+    if (pref.plain) { setPlain(p, true); J.uiApi.replan(); }
+    else if (Z.reroll) Z.reroll(); else { setPlain(p, false); J.uiApi.replan(); }
+  }
+  if (what === 'beat') {
+    p.fx.zmlBeatCut = pref.beat && bg === 'image' ? { beats: pref.beats, move: !!pref.beatMove } : null;
+    if (J.ui.plan) { J.uiApi.replan(); Z.scheduleMedia(p, J.ui.plan, p.seed | 0); J.uiApi.replan(); }
+  }
+  sync(); redraw();
+}
+const on = (id, ev, fn) => $(id)?.addEventListener(ev, fn);
+on('zmlGrainOn', 'change', e => { pref.grain = e.target.checked; savePref(); apply('grain'); });
+for (const id of ['zmlGrainAmount', 'zmlGrainLive']) on(id, 'input', e => { pref.grainAmt = +e.target.value; savePref(); apply('grain'); });
+on('zmlBeatCutOn', 'change', e => { pref.beat = e.target.checked; savePref(); apply('beat'); });
+on('zmlBeatMove', 'change', e => { pref.beatMove = e.target.checked; savePref(); apply('beat'); });
+let beatT = 0;
+for (const id of ['zmlBeatCutAmount', 'zmlBeatCutLive']) on(id, 'input', e => { pref.beats = +e.target.value; savePref(); sync(); clearTimeout(beatT); beatT = setTimeout(() => apply('beat'), 120); });
+on('zmlPlainOn', 'change', e => { pref.plain = e.target.checked; savePref(); apply('plain'); });
+for (const id of ['zmlPlainSize', 'zmlPlainSizeLive']) on(id, 'input', e => { pref.plainSize = +e.target.value; savePref(); apply('size'); });
+// after 生成 and 換一版 the rows under the preview follow what the new MV has on
+for (const key of ['generate', 'reroll']) {
+  const fn = Z[key]; if (typeof fn !== 'function') continue;
+  Z[key] = function (...args) { const out = fn.apply(this, args); if (out && typeof out.then === 'function') return out.then(r => { sync(); return r; }); sync(); return out; };
+}
+sync();
+Z.syncStream = sync;
 })();
 
 </script>
